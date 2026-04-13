@@ -13,7 +13,7 @@
 	box-sizing: border-box;
 }
 
-body {
+body.auth-page {
 	margin: 0;
 	min-height: 100vh;
 	font-family: "Montserrat", sans-serif;
@@ -27,7 +27,7 @@ body {
 	position: relative;
 }
 
-body::after {
+body.auth-page::after {
 	content: none;
 }
 
@@ -83,13 +83,13 @@ body::after {
 	letter-spacing: 0.01em;
 }
 
-.form-label {
+body.auth-page .form-label {
 	font-size: 0.82rem;
 	color: #777;
 	margin-bottom: 0.35rem;
 }
 
-.form-control {
+body.auth-page .form-control {
 	border-radius: 0;
 	border: 1px solid var(--line);
 	font-size: 0.89rem;
@@ -98,12 +98,12 @@ body::after {
 	box-shadow: none;
 }
 
-.form-control:focus {
+body.auth-page .form-control:focus {
 	border-color: var(--focus);
 	box-shadow: 0 0 0 1px rgba(122, 201, 235, 0.15);
 }
 
-.form-control[type="password"] {
+body.auth-page .form-control[type="password"] {
 	border-top: 0;
 	border-left: 0;
 	border-right: 0;
@@ -190,6 +190,146 @@ body::after {
 	text-decoration: none;
 }
 
+body.dashboard-page {
+	margin: 0;
+	font-family: "Montserrat", sans-serif;
+	background: #f2ede6;
+}
+
+.dashboard-main {
+	padding: 1.25rem 0 2rem;
+}
+
+.dashboard-hero {
+	position: relative;
+	margin: 0;
+	border-radius: 22px;
+	overflow: hidden;
+	min-height: 72vh;
+	background: url("Assets/Home.png") center/cover no-repeat;
+	box-shadow: 0 18px 40px rgba(26, 18, 8, 0.24);
+	isolation: isolate;
+}
+
+.dashboard-hero-overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(102deg, rgba(21, 14, 7, 0.78) 0%, rgba(21, 14, 7, 0.35) 55%, rgba(21, 14, 7, 0.1) 100%);
+	z-index: 0;
+}
+
+.dashboard-hero > .container-fluid {
+	z-index: 1;
+}
+
+.dashboard-hero-content {
+	max-width: 720px;
+	padding: 3.5rem 0 5.5rem;
+	color: #fff;
+}
+
+.hero-kicker {
+	display: inline-block;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	font-size: 0.8rem;
+	font-weight: 600;
+	padding: 0.35rem 0.65rem;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.09);
+}
+
+.dashboard-hero .lead {
+	max-width: 620px;
+	font-size: 1.1rem;
+	line-height: 1.6;
+	color: rgba(255, 255, 255, 0.92);
+}
+
+.coffee-ingredients-card {
+	min-height: 550px;
+	background:
+		linear-gradient(rgba(20, 12, 5, 0.55), rgba(20, 12, 5, 0.55)),
+		url("Assets/kopi.png") center/cover no-repeat;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.cups-card{
+	min-height: 550px;
+	background:
+		linear-gradient(rgba(20, 12, 5, 0.55), rgba(20, 12, 5, 0.55)),
+		url("Assets/cups.png") center/cover no-repeat;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.equipments-card {
+	min-height: 550px;
+	background:
+		linear-gradient(rgba(20, 12, 5, 0.55), rgba(20, 12, 5, 0.55)),
+		url("Assets/Equipment.png") center/cover no-repeat;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.pastries-card {
+	min-height: 550px;
+	background:
+		linear-gradient(rgba(20, 12, 5, 0.55), rgba(20, 12, 5, 0.55)),
+		url("Assets/pastries.png") center/cover no-repeat;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.shop-coffee-card {
+	min-height: var(--shop-coffee-card-height, 260px);
+	background:
+		linear-gradient(rgba(20, 12, 5, 0.55), rgba(20, 12, 5, 0.55)),
+		url("Assets/kopi.png") center/cover no-repeat;
+	color: #fff;
+}
+
+.shop-coffee-card .card-body {
+	display: flex;
+	align-items: end;
+	justify-content: center;
+}
+
+.shop-coffee-card .card-title {
+	color: #fff;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+@media (max-width: 991.98px) {
+	.dashboard-hero {
+		margin: 0;
+		min-height: 62vh;
+	}
+
+	.dashboard-hero-content {
+		padding: 2.5rem 0 4rem;
+	}
+}
+
+@media (max-width: 575.98px) {
+	.dashboard-main {
+		padding: 0.75rem 0 1.5rem;
+	}
+
+	.dashboard-hero {
+		margin: 0;
+		border-radius: 14px;
+		min-height: 70vh;
+	}
+
+	.dashboard-hero-content {
+		padding: 1.8rem 0 2.8rem;
+	}
+}
+
 @keyframes card-in {
 	from {
 		opacity: 0;
@@ -231,7 +371,7 @@ body::after {
 }
 
 @media (max-width: 575.98px) {
-	body {
+	body.auth-page {
 		padding: 0.8rem;
 	}
 

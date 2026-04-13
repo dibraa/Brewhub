@@ -11,7 +11,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 	<link href="Style.css" rel="stylesheet">
 </head>
-<body>
+<body class="auth-page">
 	<main class="auth-card container-fluid p-0">
 		<div class="row g-0 h-100">
 			<aside class="col-lg-5 auth-visual">
