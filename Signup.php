@@ -27,7 +27,12 @@
 
 					<form action="Login.php" method="post" autocomplete="off">
 						<div class="mb-2">
-							<label for="username" class="form-label">Email</label>
+							<label for="fullname" class="form-label">Full Name</label>
+							<input id="fullname" name="fullname" type="text" class="form-control" autocomplete="name" required>
+						</div>
+
+						<div class="mb-2">
+							<label for="username" class="form-label">Username</label>
 							<input id="username" name="username" type="text" class="form-control" required>
 						</div>
 
