@@ -30,15 +30,15 @@
       <div class="collapse navbar-collapse justify-content-center order-md-2" id="navbarNav">
         <ul class="navbar-nav align-items-md-center gap-md-4 gap-lg-5 bh-nav-links">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
+            <a class="nav-link active" aria-current="page" href="Dashboard.php">Home</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="productCategoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Product Categories</a>
             <ul class="dropdown-menu" aria-labelledby="productCategoriesDropdown">
-              <li><a class="dropdown-item" href="#">Coffee & Ingredients</a></li>
-              <li><a class="dropdown-item" href="#">Cups & Packaging</a></li>
-              <li><a class="dropdown-item" href="#">Equipments</a></li>
-              <li><a class="dropdown-item" href="#">Pastry</a></li>
+              <li><a class="dropdown-item" href="CoffeeIngredients.php">Coffee &amp; Ingredients</a></li>
+              <li><a class="dropdown-item" href="CupsPackaging.php">Cups &amp; Packaging</a></li>
+              <li><a class="dropdown-item" href="Equipments.php">Equipments</a></li>
+              <li><a class="dropdown-item" href="Pastry.php">Pastry</a></li>
             </ul>
           </li>
         </ul>
@@ -68,16 +68,40 @@
   <div class="container-fluid px-5 pb-5 mt-4">
     <div class="row g-3">
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center coffee-ingredients-card">Coffee & ingredients</div>
+        <a href="CoffeeIngredients.php" class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center coffee-ingredients-card category-tile text-decoration-none">
+          <span class="category-title">Coffee &amp; Ingredients</span>
+          <span class="category-overlay">
+            <span class="category-desc">Beans, syrups, milks, and ingredients.</span>
+            <span class="category-shop-btn">Shop</span>
+          </span>
+        </a>
       </div>
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center cups-card">Cups & Packaging</div>
+        <a href="CupsPackaging.php" class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center cups-card category-tile text-decoration-none">
+          <span class="category-title">Cups &amp; Packaging</span>
+          <span class="category-overlay">
+            <span class="category-desc">Cups, lids, sleeves, and packaging.</span>
+            <span class="category-shop-btn">Shop</span>
+          </span>
+        </a>
       </div>
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center equipments-card">Equipments</div>
+        <a href="Equipments.php" class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center equipments-card category-tile text-decoration-none">
+          <span class="category-title">Equipments</span>
+          <span class="category-overlay">
+            <span class="category-desc">Machines, grinders, and cafe tools.</span>
+            <span class="category-shop-btn">Shop</span>
+          </span>
+        </a>
       </div>
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center pastries-card">Pastries& Ingredients</div>
+        <a href="Pastry.php" class="p-4 rounded-3 shadow-sm h-100 text-center text-white d-flex align-items-end justify-content-center pastries-card category-tile text-decoration-none">
+          <span class="category-title">Pastry</span>
+          <span class="category-overlay">
+            <span class="category-desc">Pastries and baked goods for your menu.</span>
+            <span class="category-shop-btn">Shop</span>
+          </span>
+        </a>
       </div>
     </div>
   </div>
@@ -164,15 +188,15 @@
     <div class="container-fluid bh-footer-container">
       <div class="row g-4 g-lg-5">
         <div class="col-12 col-md-3">
-          <a class="bh-footer-brand" href="#">Brewhub</a>
+          <a class="bh-footer-brand" href="Dashboard.php">Brewhub</a>
           <img src ="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3">
         </div>
         <div class="col-6 col-md-3 d-flex flex-column gap-3">
           <h4 class="bh-footer-heading mb-0">Shop</h4>
-          <a class="bh-footer-link" href="#">All Coffee</a>
-          <a class="bh-footer-link" href="#">Equipment</a>
-          <a class="bh-footer-link" href="#">Cups & Packaging</a>
-          <a class="bh-footer-link" href="#">Pastries</a>
+          <a class="bh-footer-link" href="CoffeeIngredients.php">All Coffee</a>
+          <a class="bh-footer-link" href="Equipments.php">Equipment</a>
+          <a class="bh-footer-link" href="CupsPackaging.php">Cups &amp; Packaging</a>
+          <a class="bh-footer-link" href="Pastry.php">Pastry</a>
         </div>
 
         <div class="col-6 col-md-3 d-flex flex-column gap-3">

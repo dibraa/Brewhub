@@ -1,16 +1,18 @@
 <?php
-// Temporary demo data for seller dashboard.
+// Temporary demo data for seller orders page.
 // Replace these with database values once backend is ready.
-$totalSales = 18540.75;
-$totalOrders = 42;
-$totalProducts = 12;
+$orders = [
+	['id' => 'ORD-1021', 'customer' => 'Mia Santos', 'item' => 'Arabica Beans', 'qty' => 2, 'status' => 'Pending'],
+	['id' => 'ORD-1022', 'customer' => 'Kyle Reyes', 'item' => 'Robusta Beans', 'qty' => 1, 'status' => 'Completed'],
+	['id' => 'ORD-1023', 'customer' => 'Lea Cruz', 'item' => 'Barako Beans', 'qty' => 3, 'status' => 'Pending'],
+];
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Seller Dashboard</title>
+	<title>Seller Orders</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 	<link href="../Style.css" rel="stylesheet">
@@ -27,13 +29,13 @@ $totalProducts = 12;
 			<div class="collapse navbar-collapse justify-content-center order-md-2" id="navbarNav">
 				<ul class="navbar-nav align-items-md-center gap-md-4 gap-lg-5 bh-nav-links">
 					<li class="nav-item">
-						<a class="nav-link active" href="SellerDashboard.php">Dashboard</a>
+						<a class="nav-link" href="SellerDashboard.php">Dashboard</a>
 					</li>
 					<li class="nav-item">
 						<a class="nav-link" href="Products.php">Products</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="Orders.php">Orders</a>
+						<a class="nav-link active" aria-current="page" href="Orders.php">Orders</a>
 					</li>
 					<li class="nav-item">
 						<a class="nav-link" href="ShopProfile.php">Shop Profile</a>
@@ -48,33 +50,44 @@ $totalProducts = 12;
 			<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
 				<div>
 					<p class="profile-kicker mb-2"><i class="bi bi-shop me-2"></i>Seller Center</p>
-					<h1 class="seller-dashboard-title mb-0">Seller Dashboard</h1>
+					<h1 class="seller-dashboard-title mb-0">Orders</h1>
 				</div>
 			</div>
 
-			<section id="overview" class="mb-4">
-				<div class="row g-3">
-					<div class="col-12 col-md-4">
-						<div class="seller-stat-card h-100">
-							<div class="seller-stat-icon"><i class="bi bi-cash-coin"></i></div>
-							<p class="seller-stat-label mb-1">Total Sales</p>
-							<h3 class="seller-stat-value mb-0">PHP <?php echo number_format($totalSales, 2); ?></h3>
-						</div>
-					</div>
-					<div class="col-12 col-md-4">
-						<div class="seller-stat-card h-100">
-							<div class="seller-stat-icon"><i class="bi bi-receipt"></i></div>
-							<p class="seller-stat-label mb-1">Total Orders</p>
-							<h3 class="seller-stat-value mb-0"><?php echo (int) $totalOrders; ?></h3>
-						</div>
-					</div>
-					<div class="col-12 col-md-4">
-						<div class="seller-stat-card h-100">
-							<div class="seller-stat-icon"><i class="bi bi-box-seam"></i></div>
-							<p class="seller-stat-label mb-1">Total Products</p>
-							<h3 class="seller-stat-value mb-0"><?php echo (int) $totalProducts; ?></h3>
-						</div>
-					</div>
+			<section class="seller-section-card mb-4">
+				<h2 class="seller-section-heading mb-3"><i class="bi bi-bag-check me-2"></i>Orders</h2>
+				<div class="table-responsive">
+					<table class="table seller-table align-middle">
+						<thead>
+							<tr>
+								<th>Order ID</th>
+								<th>Customer</th>
+								<th>Item</th>
+								<th>Qty</th>
+								<th style="width: 180px;">Status</th>
+								<th style="width: 150px;">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach ($orders as $order): ?>
+								<tr>
+									<td><?php echo htmlspecialchars($order['id'], ENT_QUOTES, 'UTF-8'); ?></td>
+									<td><?php echo htmlspecialchars($order['customer'], ENT_QUOTES, 'UTF-8'); ?></td>
+									<td><?php echo htmlspecialchars($order['item'], ENT_QUOTES, 'UTF-8'); ?></td>
+									<td><?php echo (int) $order['qty']; ?></td>
+									<td>
+										<select class="form-select seller-form-control">
+											<option <?php echo $order['status'] === 'Pending' ? 'selected' : ''; ?>>Pending</option>
+											<option <?php echo $order['status'] === 'Completed' ? 'selected' : ''; ?>>Completed</option>
+										</select>
+									</td>
+									<td>
+										<button type="button" class="btn btn-sm profile-btn profile-btn-edit"><i class="bi bi-arrow-repeat me-1"></i>Update</button>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
 				</div>
 			</section>
 		</div>
@@ -91,13 +104,13 @@ $totalProducts = 12;
 					<h4 class="bh-footer-heading mb-3 text-center text-md-start">Menu</h4>
 					<ul class="navbar-nav flex-column flex-sm-row flex-wrap justify-content-center justify-content-md-start align-items-center gap-2 gap-md-4 gap-lg-5 bh-nav-links seller-footer-links">
 						<li class="nav-item">
-							<a class="nav-link active" aria-current="page" href="SellerDashboard.php">Dashboard</a>
+							<a class="nav-link" href="SellerDashboard.php">Dashboard</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" href="Products.php">Products</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="Orders.php">Orders</a>
+							<a class="nav-link active" aria-current="page" href="Orders.php">Orders</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" href="ShopProfile.php">Shop Profile</a>

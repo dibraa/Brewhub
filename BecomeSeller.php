@@ -58,7 +58,7 @@ $email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'aria
 							<h1 class="seller-title mb-2">Apply to Become a Seller</h1>
 							<p class="seller-intro mb-4">Start selling your coffee products. Please fill out the form below. Your application will be reviewed before approval.</p>
 
-							<form action=".../SellerDashboard.php" method="post" autocomplete="on" class="row g-4">
+							<form action="Seller/SellerDashboard.php" method="post" autocomplete="on" class="row g-4">
 								<div class="col-12">
 									<h2 class="seller-section-title"><i class="bi bi-person-badge me-2"></i>Basic Information</h2>
 								</div>
