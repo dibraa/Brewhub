@@ -1,12 +1,179 @@
+<?php
+declare(strict_types=1);
+
+session_start();
+
+function bh_env(string $key, string $default): string
+{
+  $value = getenv($key);
+  if ($value === false || $value === '') {
+    return $default;
+  }
+  return $value;
+}
+
+function bh_db_connect(): ?mysqli
+{
+  mysqli_report(MYSQLI_REPORT_OFF);
+
+  $host = bh_env('BREWHUB_DB_HOST', '127.0.0.1');
+  $user = bh_env('BREWHUB_DB_USER', 'root');
+  $pass = bh_env('BREWHUB_DB_PASS', '');
+  $name = bh_env('BREWHUB_DB_NAME', 'brewhub');
+  $port = (int) bh_env('BREWHUB_DB_PORT', '3306');
+
+  $db = @new mysqli($host, $user, $pass, $name, $port);
+  if ($db && !$db->connect_errno) {
+    @$db->set_charset('utf8mb4');
+    return $db;
+  }
+
+  return null;
+}
+
+function bh_demo_products(): array
+{
+  return [
+    [
+      'id' => 101,
+      'name' => 'Arabica Beans (1kg)',
+      'category' => 'Coffee & Ingredients',
+      'price' => 549.00,
+      'image' => '../Assets/Arabica.png',
+    ],
+    [
+      'id' => 102,
+      'name' => 'Robusta Beans (1kg)',
+      'category' => 'Coffee & Ingredients',
+      'price' => 499.00,
+      'image' => '../Assets/Robusta.png',
+    ],
+    [
+      'id' => 106,
+      'name' => 'Barako Beans (1kg)',
+      'category' => 'Coffee & Ingredients',
+      'price' => 529.00,
+      'image' => '../Assets/Barako.png',
+    ],
+    [
+      'id' => 115,
+      'name' => 'Arabica + Robusta Blend (1kg)',
+      'category' => 'Coffee & Ingredients',
+      'price' => 519.00,
+      'image' => '../Assets/Arabica + robusta.png',
+    ],
+    [
+      'id' => 103,
+      'name' => 'Coffee Cups Pack',
+      'category' => 'Cups & Packaging',
+      'price' => 129.00,
+      'image' => '../Assets/Cups.png',
+    ],
+    [
+      'id' => 104,
+      'name' => 'Brewing Equipment Set',
+      'category' => 'Equipments',
+      'price' => 1499.00,
+      'image' => '../Assets/Equipment.png',
+    ],
+    [
+      'id' => 105,
+      'name' => 'Pastry Box Bundle',
+      'category' => 'Pastry',
+      'price' => 219.00,
+      'image' => '../Assets/pastries.png',
+    ],
+  ];
+}
+
+function bh_fetch_products_from_db(): ?array
+{
+  $db = bh_db_connect();
+  if (!$db) {
+    return null;
+  }
+
+  $tablesToTry = ['products', 'product', 'items'];
+  $rows = null;
+
+  foreach ($tablesToTry as $table) {
+    // Try a few common column names; if it fails, fallback.
+    $sqls = [
+      "SELECT id, name, price, image, category FROM `{$table}` LIMIT 30",
+      "SELECT product_id AS id, product_name AS name, price, image AS image, category AS category FROM `{$table}` LIMIT 30",
+      "SELECT id, title AS name, price, image_url AS image, category AS category FROM `{$table}` LIMIT 30",
+    ];
+
+    foreach ($sqls as $sql) {
+      $result = @$db->query($sql);
+      if (!$result) {
+        continue;
+      }
+
+      $tmp = [];
+      while ($r = $result->fetch_assoc()) {
+        $tmp[] = [
+          'id' => (int) ($r['id'] ?? 0),
+          'name' => (string) ($r['name'] ?? ''),
+          'category' => (string) ($r['category'] ?? 'Coffee & Ingredients'),
+          'price' => (float) ($r['price'] ?? 0),
+          'image' => (string) ($r['image'] ?? '../Assets/Carousel.png'),
+        ];
+      }
+      $result->free();
+
+      if (count($tmp) > 0) {
+        $rows = $tmp;
+        break 2;
+      }
+    }
+  }
+
+  @$db->close();
+  return $rows;
+}
+
+if (!isset($_SESSION['bh_cart']) || !is_array($_SESSION['bh_cart'])) {
+  $_SESSION['bh_cart'] = [];
+}
+
+$flash = null;
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+  $action = (string) ($_POST['action'] ?? '');
+  $productId = (int) ($_POST['product_id'] ?? 0);
+
+  if ($productId > 0 && ($action === 'add_to_cart' || $action === 'buy_now')) {
+    $cart = (array) $_SESSION['bh_cart'];
+    $cart[$productId] = (int) ($cart[$productId] ?? 0) + 1;
+    $_SESSION['bh_cart'] = $cart;
+
+    $flash = ($action === 'buy_now')
+      ? 'Added to cart (demo). Buy Now flow coming soon.'
+      : 'Added to cart (demo).';
+  }
+}
+
+$cartCount = array_sum(array_map('intval', (array) $_SESSION['bh_cart']));
+
+$allProducts = bh_fetch_products_from_db() ?? bh_demo_products();
+
+// This page is Coffee & Ingredients. Filter accordingly (demo-friendly).
+$products = array_values(array_filter($allProducts, static function ($p): bool {
+  $category = strtolower((string) ($p['category'] ?? ''));
+  return $category === '' || strpos($category, 'coffee') !== false;
+}));
+?>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Coffee & Ingredients</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="../Style.css" rel="stylesheet">
+    <link href="../Style.css?v=20260420" rel="stylesheet">
 
   </head>
 <body class="dashboard-page">
@@ -20,7 +187,7 @@
         </a>
         <a class="btn bh-icon-btn position-relative" href="#" aria-label="Cart">
           <i class="bi bi-bag"></i>
-          <span class="bh-cart-count">2</span>
+          <span class="bh-cart-count"><?php echo (int) $cartCount; ?></span>
         </a>
         <button class="navbar-toggler border-0 shadow-none p-0 ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -58,47 +225,68 @@
       </div>
     </section>
 
-    <div class="container-fluid px-5 pb-5 mt-4 products-grid">
-      <h3 class="text-center mt-5">Coffee &amp; Ingredients</h3>
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3 mt-3">
-        <div class="col">
-          <div class="card h-100 shadow-sm reference-product-card">
-            <div class="reference-product-image-wrap">
-              <img src="../Assets/Arabica.png" alt="Arabica" style="width: 65%; height: auto; object-fit: cover; display: block; margin: 0 auto;">
-            </div>
-            <div class="card-body reference-product-body">
-              <h5 class="reference-product-title mb-1">Arabica</h5>
-              <h6 class="reference-product-seller mb-2">Seller name</h6>
-              <h5 class="reference-product-price mb-0">₱960.00</h5>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card h-100 shadow-sm reference-product-card">
-            <div class="reference-product-image-wrap">
-              <img src="../Assets/Robusta.png" alt="Robusta" style="width: 65%; height: auto; object-fit: cover; display: block; margin: 0 auto;">
-            </div>
-            <div class="card-body reference-product-body">
-              <h5 class="reference-product-title mb-1">Robusta</h5>
-              <h6 class="reference-product-seller mb-2">Seller name</h6>
-              <h5 class="reference-product-price mb-0">₱299.00</h5>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card h-100 shadow-sm reference-product-card">
-            <div class="reference-product-image-wrap">
-              <img src="../Assets/Barako.png" alt="Barako" style="width: 65%; height: auto; object-fit: cover; display: block; margin: 0 auto;">
-            </div>
-            <div class="card-body reference-product-body">
-              <h5 class="reference-product-title mb-1">Barako</h5>
-              <h6 class="reference-product-seller mb-2">Seller name</h6>
-              <h5 class="reference-product-price mb-0">₱295.00</h5>
-            </div>
-          </div>
-        </div>
+  <div class="container-fluid px-5 pb-5 mt-4 products-grid">
+    <?php if ($flash): ?>
+      <div class="alert alert-warning border-0" role="alert">
+        <?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?>
       </div>
+    <?php endif; ?>
+
+    <div class="row g-4 mt-3">
+      <?php if (count($products) === 0): ?>
+        <div class="col-12">
+          <div class="bh-section-card">
+            <div class="d-flex align-items-center gap-2">
+              <span class="bh-card-icon"><i class="bi bi-inbox"></i></span>
+              <div>
+                <div class="fw-bold">No products found</div>
+                <div class="text-muted">Add products to your database later — they will show here.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php else: ?>
+        <?php foreach ($products as $p): ?>
+          <?php
+            $id = (int) ($p['id'] ?? 0);
+            $name = (string) ($p['name'] ?? '');
+            $category = strtoupper((string) ($p['category'] ?? 'Coffee & Ingredients'));
+            $price = (float) ($p['price'] ?? 0);
+            $image = (string) ($p['image'] ?? '../Assets/Carousel.png');
+          ?>
+
+          <div class="col-12 col-sm-6 col-lg-4">
+            <div class="bh-product-card h-100">
+              <div class="bh-product-media">
+                <img class="bh-product-img" src="<?php echo htmlspecialchars($image, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
+              </div>
+              <div class="bh-product-body">
+                <div class="bh-product-top">
+                  <h3 class="bh-product-title"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></h3>
+                  <div class="bh-product-price">₱<?php echo number_format($price, 2); ?></div>
+                </div>
+                <div class="bh-product-meta">
+                  <span class="bh-product-badge"><?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?></span>
+                </div>
+                <div class="bh-product-actions">
+                  <form method="post" class="m-0">
+                    <input type="hidden" name="action" value="add_to_cart">
+                    <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+                    <button type="submit" class="btn bh-btn bh-btn-primary btn-sm"><i class="bi bi-bag-plus me-1"></i>Add to cart</button>
+                  </form>
+                  <form method="post" class="m-0">
+                    <input type="hidden" name="action" value="buy_now">
+                    <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+                    <button type="submit" class="btn bh-btn bh-btn-ghost btn-sm"><i class="bi bi-lightning-charge me-1"></i>Buy now</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
     </div>
+  </div>
   </main>
 
   <footer class="bh-footer py-5 px-4 px-lg-5 mt-5">

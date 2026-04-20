@@ -199,6 +199,19 @@ body.dashboard-page {
 	padding-top: 5.25rem;
 }
 
+/* Admin dashboard styling (keeps buyer/seller pages unchanged). */
+body.admin-page {
+	margin: 0;
+	min-height: 100vh;
+	font-family: "Montserrat", sans-serif;
+	padding-top: 5.25rem;
+	background:
+		radial-gradient(1200px 520px at 15% 0%, rgba(150, 75, 0, 0.12) 0%, rgba(150, 75, 0, 0) 55%),
+		radial-gradient(900px 420px at 95% 10%, rgba(150, 75, 0, 0.08) 0%, rgba(150, 75, 0, 0) 62%),
+		#f2ede6;
+	overflow-x: hidden;
+}
+
 .bh-navbar {
 	background: rgba(255, 248, 245, 0.8);
 	box-shadow: 0 20px 40px rgba(36, 25, 18, 0.06);
@@ -290,6 +303,10 @@ body.dashboard-page {
 		padding-top: 4.7rem;
 	}
 
+	body.admin-page {
+		padding-top: 4.7rem;
+	}
+
 	.bh-nav-container {
 		min-height: 4.5rem;
 	}
@@ -306,6 +323,356 @@ body.dashboard-page {
 		display: inline-block;
 		padding-left: 0;
 		padding-right: 0;
+	}
+}
+
+.admin-main {
+	padding: 1.25rem 0 2.25rem;
+}
+
+.admin-hero {
+	position: relative;
+	margin: 0 1rem;
+	border-radius: 22px;
+	overflow: hidden;
+	min-height: 70vh;
+	box-shadow: 0 18px 40px rgba(26, 18, 8, 0.22);
+	isolation: isolate;
+}
+
+@media (min-width: 992px) {
+	.admin-hero {
+		margin: 0 2rem;
+	}
+}
+
+.admin-hero::before {
+	content: "";
+	position: absolute;
+	inset: -30px;
+	background: url("Assets/Carousel.png") center/cover no-repeat;
+	filter: blur(14px);
+	transform: scale(1.1);
+	z-index: 0;
+}
+
+.admin-hero::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(102deg, rgba(21, 14, 7, 0.82) 0%, rgba(21, 14, 7, 0.42) 55%, rgba(21, 14, 7, 0.16) 100%);
+	z-index: 1;
+}
+
+.admin-hero-content {
+	position: relative;
+	z-index: 2;
+	max-width: 760px;
+	padding: 4.25rem 0 5.25rem;
+	color: #fff;
+}
+
+.admin-hero .lead {
+	max-width: 640px;
+	font-size: 1.1rem;
+	line-height: 1.6;
+	color: rgba(255, 255, 255, 0.92);
+}
+
+.admin-dashboard {
+	position: relative;
+}
+
+.admin-dashboard-title {
+	font-weight: 800;
+	letter-spacing: 0.01em;
+	color: #3f291f;
+}
+
+.admin-dashboard-subtitle {
+	color: rgba(63, 41, 31, 0.7);
+	font-size: 0.98rem;
+	line-height: 1.6;
+}
+
+.admin-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 1.75rem;
+	padding: 0 0.7rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: rgba(63, 41, 31, 0.92);
+	background: rgba(255, 255, 255, 0.68);
+	border: 1px solid rgba(111, 78, 55, 0.18);
+}
+
+.admin-stats-row {
+	align-items: stretch;
+}
+
+.admin-stat-card {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	gap: 0.9rem;
+	padding: 1rem 1.05rem;
+	border-radius: 16px;
+	background: linear-gradient(155deg, #fffaf4 0%, #f8f0e4 100%);
+	border: 1px solid rgba(111, 78, 55, 0.14);
+	box-shadow: 0 12px 26px rgba(57, 35, 23, 0.08);
+}
+
+.admin-stat-icon {
+	width: 2.55rem;
+	height: 2.55rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	background: rgba(150, 75, 0, 0.14);
+	color: #964B00;
+	font-size: 1.15rem;
+	flex: 0 0 auto;
+}
+
+.admin-stat-label {
+	font-size: 0.76rem;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: rgba(123, 93, 72, 0.92);
+	margin-bottom: 0.1rem;
+}
+
+.admin-stat-value {
+	font-size: 1.55rem;
+	font-weight: 900;
+	letter-spacing: -0.01em;
+	color: #3f291f;
+	line-height: 1.05;
+}
+
+.admin-section-card,
+.bh-section-card {
+	background: linear-gradient(155deg, #fffaf4 0%, #f8f0e4 100%);
+	border: 1px solid rgba(111, 78, 55, 0.14);
+	border-radius: 18px;
+	padding: 1.1rem;
+	box-shadow: 0 14px 30px rgba(57, 35, 23, 0.10);
+}
+
+.admin-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.85rem;
+}
+
+.admin-card-icon,
+.bh-card-icon {
+	width: 2.25rem;
+	height: 2.25rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	background: rgba(150, 75, 0, 0.14);
+	color: #964B00;
+	font-size: 1.05rem;
+}
+
+.admin-card-title {
+	font-size: 1.05rem;
+	font-weight: 800;
+	color: #3f291f;
+}
+
+.admin-card-link {
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	text-decoration: none;
+	color: rgba(150, 75, 0, 0.95);
+	padding: 0.35rem 0.55rem;
+	border-radius: 999px;
+	background: rgba(150, 75, 0, 0.10);
+	transition: filter 160ms ease, background-color 160ms ease;
+}
+
+.admin-card-link:hover,
+.admin-card-link:focus {
+	color: rgba(150, 75, 0, 0.95);
+	background: rgba(150, 75, 0, 0.14);
+	filter: brightness(0.98);
+}
+
+.admin-table {
+	--bs-table-bg: transparent;
+}
+
+.admin-table thead th {
+	font-size: 0.74rem;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	font-weight: 800;
+	color: rgba(90, 61, 42, 0.9);
+	border-bottom: 1px solid rgba(111, 78, 55, 0.22);
+	padding-top: 0.6rem;
+	padding-bottom: 0.6rem;
+}
+
+.admin-table tbody td {
+	font-size: 0.92rem;
+	color: #3f291f;
+	border-color: rgba(111, 78, 55, 0.14);
+	vertical-align: middle;
+	padding-top: 0.8rem;
+	padding-bottom: 0.8rem;
+}
+
+.admin-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	padding: 0.28rem 0.6rem;
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #964B00;
+	background: rgba(150, 75, 0, 0.12);
+	border: 1px solid rgba(150, 75, 0, 0.20);
+}
+
+.admin-status {
+	font-weight: 800;
+	color: #964B00;
+}
+
+.admin-status-muted {
+	color: rgba(63, 41, 31, 0.62);
+}
+
+.admin-btn {
+	border-radius: 10px;
+	font-weight: 700;
+	font-size: 0.82rem;
+	padding: 0.42rem 0.7rem;
+	box-shadow: none;
+	transition: transform 140ms ease, filter 140ms ease, background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.admin-btn-primary {
+	background: #964B00;
+	border: 1px solid #964B00;
+	color: #fff;
+}
+
+.admin-btn-primary:hover,
+.admin-btn-primary:focus {
+	background: #783c00;
+	border-color: #783c00;
+	color: #fff;
+	filter: brightness(0.98);
+}
+
+.admin-btn-ghost {
+	background: rgba(255, 255, 255, 0.65);
+	border: 1px solid rgba(111, 78, 55, 0.22);
+	color: rgba(63, 41, 31, 0.92);
+}
+
+.admin-btn-ghost:hover,
+.admin-btn-ghost:focus {
+	background: rgba(255, 255, 255, 0.9);
+	border-color: rgba(150, 75, 0, 0.30);
+	color: rgba(63, 41, 31, 0.95);
+}
+
+.admin-btn-danger {
+	background: rgba(255, 255, 255, 0.65);
+	border: 1px solid rgba(159, 47, 47, 0.55);
+	color: rgba(159, 47, 47, 0.92);
+}
+
+.admin-btn-danger:hover,
+.admin-btn-danger:focus {
+	background: rgba(159, 47, 47, 0.95);
+	border-color: rgba(159, 47, 47, 0.95);
+	color: #fff;
+}
+
+.admin-product-card {
+	padding: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.admin-product-media {
+	background: rgba(150, 75, 0, 0.10);
+}
+
+.admin-product-img {
+	width: 100%;
+	height: 185px;
+	object-fit: cover;
+	display: block;
+}
+
+.admin-product-body {
+	padding: 1rem 1.05rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	flex: 1;
+}
+
+.admin-product-name {
+	font-size: 1.02rem;
+	font-weight: 900;
+	letter-spacing: -0.01em;
+	color: #3f291f;
+	margin: 0;
+}
+
+.admin-product-meta {
+	font-size: 0.88rem;
+	color: rgba(63, 41, 31, 0.74);
+}
+
+.admin-product-price {
+	font-weight: 900;
+	color: #964B00;
+	white-space: nowrap;
+}
+
+.admin-product-actions {
+	margin-top: auto;
+	display: flex;
+	justify-content: flex-end;
+}
+
+@media (max-width: 575.98px) {
+	.admin-hero {
+		margin: 0 0.75rem;
+		min-height: 62vh;
+	}
+
+	.admin-hero-content {
+		padding: 3.25rem 0 4.25rem;
+	}
+
+	.admin-table thead th {
+		white-space: nowrap;
 	}
 }
 
@@ -536,6 +903,115 @@ body.dashboard-page {
 	font-weight: 500;
 	line-height: 1.1;
 	color: #8f583d;
+}
+
+/* Buyer product cards (Coffee & Ingredients etc). */
+.bh-product-card {
+	border-radius: 22px;
+	overflow: hidden;
+	background: linear-gradient(155deg, #fffaf4 0%, #f8f0e4 100%);
+	border: 1px solid rgba(111, 78, 55, 0.14);
+	box-shadow: 0 14px 30px rgba(57, 35, 23, 0.10);
+	display: flex;
+	flex-direction: column;
+}
+
+.bh-product-media {
+	background: rgba(150, 75, 0, 0.10);
+}
+
+.bh-product-img {
+	width: 100%;
+	height: 235px;
+	object-fit: cover;
+	display: block;
+}
+
+.bh-product-body {
+	padding: 1.05rem 1.2rem 1.15rem;
+	background: rgba(255, 248, 240, 0.92);
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+}
+
+.bh-product-top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.bh-product-title {
+	font-size: 1.25rem;
+	font-weight: 900;
+	letter-spacing: -0.01em;
+	color: #3f291f;
+	margin: 0;
+}
+
+.bh-product-price {
+	font-weight: 900;
+	font-size: 1.15rem;
+	color: #964B00;
+	white-space: nowrap;
+}
+
+.bh-product-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	padding: 0.42rem 0.85rem;
+	font-size: 0.78rem;
+	font-weight: 900;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #964B00;
+	background: rgba(150, 75, 0, 0.12);
+	border: 1px solid rgba(150, 75, 0, 0.20);
+}
+
+.bh-product-actions {
+	margin-top: auto;
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.6rem;
+}
+
+.bh-btn {
+	border-radius: 12px;
+	font-weight: 800;
+	font-size: 0.86rem;
+	padding: 0.55rem 0.95rem;
+	box-shadow: none;
+}
+
+.bh-btn-primary {
+	background: #964B00;
+	border: 1px solid #964B00;
+	color: #fff;
+}
+
+.bh-btn-primary:hover,
+.bh-btn-primary:focus {
+	background: #783c00;
+	border-color: #783c00;
+	color: #fff;
+}
+
+.bh-btn-ghost {
+	background: rgba(255, 255, 255, 0.72);
+	border: 1px solid rgba(111, 78, 55, 0.25);
+	color: rgba(63, 41, 31, 0.92);
+}
+
+.bh-btn-ghost:hover,
+.bh-btn-ghost:focus {
+	background: rgba(255, 255, 255, 0.92);
+	border-color: rgba(150, 75, 0, 0.30);
+	color: rgba(63, 41, 31, 0.95);
 }
 
 .products-grid .row {
