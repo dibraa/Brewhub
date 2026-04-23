@@ -195,7 +195,7 @@ $products = array_values(array_filter($allProducts, function ($p): bool {
     <title>Cups & Packaging</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="../Style.css?v=20260420" rel="stylesheet">
+    <link href="../Style.css?v=20260423" rel="stylesheet">
 
   </head>
 <body class="dashboard-page">
@@ -207,7 +207,7 @@ $products = array_values(array_filter($allProducts, function ($p): bool {
         <a class="btn bh-icon-btn" href="../Profile.php" aria-label="Profile">
           <i class="bi bi-person"></i>
         </a>
-		<a class="btn bh-icon-btn position-relative" href="#" aria-label="Cart">
+		<a class="btn bh-icon-btn position-relative" href="Cart.php" aria-label="Cart">
           <i class="bi bi-bag"></i>
 			<span class="bh-cart-count"><?php echo (int) $cartCount; ?></span>
         </a>
@@ -229,6 +229,9 @@ $products = array_values(array_filter($allProducts, function ($p): bool {
               <li><a class="dropdown-item" href="Equipments.php">Equipments</a></li>
               <li><a class="dropdown-item" href="Pastry.php">Pastry</a></li>
             </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="Orders.php">Orders</a>
           </li>
         </ul>
       </div>
@@ -275,10 +278,21 @@ $products = array_values(array_filter($allProducts, function ($p): bool {
             $category = strtoupper((string) ($p['category'] ?? 'Cups & Packaging'));
             $price = (float) ($p['price'] ?? 0);
             $image = (string) ($p['image'] ?? '../Assets/Carousel.png');
+            $description = 'A premium ' . $name . ' perfect for cafe daily operations. Great quality and ideal for serving and packaging.';
           ?>
 
           <div class="col-12 col-sm-6 col-lg-4">
-            <div class="bh-product-card h-100">
+            <div
+              class="bh-product-card h-100 js-product-preview"
+              role="button"
+              tabindex="0"
+              data-product-id="<?php echo $id; ?>"
+              data-name="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>"
+              data-category="<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>"
+              data-price="₱<?php echo number_format($price, 2); ?>"
+              data-image="<?php echo htmlspecialchars($image, ENT_QUOTES, 'UTF-8'); ?>"
+              data-description="<?php echo htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?>"
+            >
               <div class="bh-product-media">
                 <img class="bh-product-img" src="<?php echo htmlspecialchars($image, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
               </div>
@@ -309,48 +323,80 @@ $products = array_values(array_filter($allProducts, function ($p): bool {
       <?php endif; ?>
     </div>
   </div>
+
+  <div class="bh-preview-backdrop" id="bhProductPreview" hidden>
+    <div class="bh-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="bhPreviewTitle">
+      <div class="bh-product-card bh-preview-card">
+        <button type="button" class="bh-preview-close" id="bhPreviewClose" aria-label="Close preview">
+          <i class="bi bi-x-lg"></i>
+        </button>
+
+        <div class="bh-product-media">
+          <img class="bh-product-img" id="bhPreviewImage" src="" alt="">
+        </div>
+
+        <div class="bh-product-body">
+          <div class="bh-product-top">
+            <h3 class="bh-product-title" id="bhPreviewTitle"></h3>
+            <div class="bh-product-price" id="bhPreviewPrice"></div>
+          </div>
+
+          <div class="bh-product-meta">
+            <span class="bh-product-badge" id="bhPreviewCategory"></span>
+          </div>
+
+          <form class="bh-preview-form" onsubmit="return false;">
+            <label class="bh-preview-label" for="bhPreviewDescription">Description</label>
+            <textarea class="form-control bh-preview-description" id="bhPreviewDescription" rows="4" readonly></textarea>
+          </form>
+
+          <div class="bh-product-actions bh-preview-actions">
+            <form method="post" class="m-0">
+              <input type="hidden" name="action" value="add_to_cart">
+              <input type="hidden" name="product_id" id="bhPreviewAddProductId" value="">
+              <button type="submit" class="btn bh-btn bh-btn-primary btn-sm"><i class="bi bi-bag-plus me-1"></i>Add to cart</button>
+            </form>
+            <form method="post" class="m-0">
+              <input type="hidden" name="action" value="buy_now">
+              <input type="hidden" name="product_id" id="bhPreviewBuyProductId" value="">
+              <button type="submit" class="btn bh-btn bh-btn-ghost btn-sm"><i class="bi bi-lightning-charge me-1"></i>Buy now</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   </main>
 
-  <footer class="bh-footer py-5 px-4 px-lg-5 mt-5">
-    <div class="container-fluid bh-footer-container">
-      <div class="row g-4 g-lg-5">
-        <div class="col-12 col-md-3">
-          <a class="bh-footer-brand" href="Dashboard.php">Brewhub</a>
-          <img src ="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3">
-        </div>
-        <div class="col-6 col-md-3 d-flex flex-column gap-3">
-          <h4 class="bh-footer-heading mb-0">Shop</h4>
-          <a class="bh-footer-link" href="CoffeeIngredients.php">All Coffee</a>
-          <a class="bh-footer-link" href="Equipments.php">Equipment</a>
-          <a class="bh-footer-link" href="CupsPackaging.php">Cups &amp; Packaging</a>
-          <a class="bh-footer-link" href="Pastry.php">Pastry</a>
+  <footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+    <div class="container-fluid bh-footer-bar-container">
+      <div class="bh-footer-bar-left">
+        <div class="bh-footer-bar-logo-box">
+          <img src="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-bar-logo">
         </div>
 
-        <div class="col-6 col-md-3 d-flex flex-column gap-3">
-          <h4 class="bh-footer-heading mb-0">Experience</h4>
-          <a class="bh-footer-link" href="#">Brew Guides</a>
-          <a class="bh-footer-link" href="#">Journal</a>
-          <a class="bh-footer-link" href="#">Wholesale</a>
-        </div>
-
-        <div class="col-6 col-md-3 d-flex flex-column gap-3">
-          <h4 class="bh-footer-heading mb-0">Legal</h4>
-          <a class="bh-footer-link" href="#">Privacy Policy</a>
-          <a class="bh-footer-link" href="#">Terms of Service</a>
-          <a class="bh-footer-link" href="#">Shipping &amp; Returns</a>
+        <div class="bh-footer-bar-meta">
+          <div class="bh-footer-bar-copy">&copy; 2026 Brewhub</div>
+          <div class="bh-footer-bar-legal" aria-label="Legal links">
+            <a class="bh-footer-bar-legal-link" href="#">Terms</a>
+            <a class="bh-footer-bar-legal-link" href="#">Privacy</a>
+            <a class="bh-footer-bar-legal-link" href="#">Cookies</a>
+          </div>
         </div>
       </div>
 
-      <div class="bh-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-5 pt-4">
-        <p class="bh-footer-copy mb-0">&copy; 2024 Brewhub Editorial. All rights reserved.</p>
-        <div class="d-flex gap-3 mt-3 mt-md-0">
-          <a class="bh-footer-social" href="#" aria-label="Share"><i class="bi bi-share"></i></a>
-          <a class="bh-footer-social" href="#" aria-label="Language"><i class="bi bi-globe2"></i></a>
-        </div>
-      </div>
+      <nav class="bh-footer-bar-nav" aria-label="Footer navigation">
+        <a class="bh-footer-bar-link" href="Dashboard.php">Home</a>
+        <a class="bh-footer-bar-link" href="Orders.php">Orders</a>
+        <a class="bh-footer-bar-link" href="CoffeeIngredients.php">Coffee &amp; Ingredients</a>
+        <a class="bh-footer-bar-link" href="CupsPackaging.php">Cups &amp; Packaging</a>
+        <a class="bh-footer-bar-link" href="Equipments.php">Equipments</a>
+        <a class="bh-footer-bar-link" href="Pastry.php">Pastry</a>
+      </nav>
     </div>
   </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="product-preview.js"></script>
 </body>
 </html>

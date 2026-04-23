@@ -118,43 +118,30 @@ $email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'aria
 		</div>
 	</main>
 
-	<footer class="bh-footer py-5 px-4 px-lg-5 mt-5">
-		<div class="container-fluid bh-footer-container">
-			<div class="row g-4 g-lg-5">
-				<div class="col-12 col-md-3">
-					<a class="bh-footer-brand" href="#">Brewhub</a>
-					<img src="Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3">
-				</div>
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Shop</h4>
-					<a class="bh-footer-link" href="#">All Coffee</a>
-					<a class="bh-footer-link" href="#">Equipment</a>
-					<a class="bh-footer-link" href="#">Cups & Packaging</a>
-					<a class="bh-footer-link" href="#">Pastries</a>
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+		<div class="container-fluid bh-footer-bar-container">
+			<div class="bh-footer-bar-left">
+				<div class="bh-footer-bar-logo-box">
+					<img src="Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-bar-logo">
 				</div>
 
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Experience</h4>
-					<a class="bh-footer-link" href="#">Brew Guides</a>
-					<a class="bh-footer-link" href="#">Journal</a>
-					<a class="bh-footer-link" href="#">Wholesale</a>
-				</div>
-
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Legal</h4>
-					<a class="bh-footer-link" href="#">Privacy Policy</a>
-					<a class="bh-footer-link" href="#">Terms of Service</a>
-					<a class="bh-footer-link" href="#">Shipping & Returns</a>
+				<div class="bh-footer-bar-meta">
+					<div class="bh-footer-bar-copy">&copy; 2026 Brewhub</div>
+					<div class="bh-footer-bar-legal" aria-label="Legal links">
+						<a class="bh-footer-bar-legal-link" href="#">Terms</a>
+						<a class="bh-footer-bar-legal-link" href="#">Privacy</a>
+						<a class="bh-footer-bar-legal-link" href="#">Cookies</a>
+					</div>
 				</div>
 			</div>
 
-			<div class="bh-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-5 pt-4">
-				<p class="bh-footer-copy mb-0">&copy; 2024 Brewhub Editorial. All rights reserved.</p>
-				<div class="d-flex gap-3 mt-3 mt-md-0">
-					<a class="bh-footer-social" href="#" aria-label="Share"><i class="bi bi-share"></i></a>
-					<a class="bh-footer-social" href="#" aria-label="Language"><i class="bi bi-globe2"></i></a>
-				</div>
-			</div>
+			<nav class="bh-footer-bar-nav" aria-label="Footer navigation">
+				<a class="bh-footer-bar-link" href="Buyer/Dashboard.php">Home</a>
+				<a class="bh-footer-bar-link" href="Buyer/CoffeeIngredients.php">Coffee &amp; Ingredients</a>
+				<a class="bh-footer-bar-link" href="Buyer/CupsPackaging.php">Cups &amp; Packaging</a>
+				<a class="bh-footer-bar-link" href="Buyer/Equipments.php">Equipments</a>
+				<a class="bh-footer-bar-link" href="Buyer/Pastry.php">Pastry</a>
+			</nav>
 		</div>
 	</footer>
 

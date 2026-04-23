@@ -39,7 +39,7 @@
 						</div>
 
 						<div class="text-end mb-3">
-							<a href="#" class="forgot-link">Forgot your password?</a>
+							<a href="ForgotPassword.php" class="forgot-link">Forgot your password?</a>
 						</div>
 
 						<button type="submit" class="btn btn-login w-100">Log In</button>
@@ -48,7 +48,6 @@
 					<div class="or-divider" aria-hidden="true"><span>OR</span></div>
 
 					<div class="social-row">
-						<a class="social-btn" href="#"><i class="bi bi-facebook"></i> Sign in with Facebook</a>
 						<a class="social-btn" href="#"><i class="bi bi-google"></i> Sign in with Google</a>
 					</div>
 
