@@ -25,7 +25,7 @@
 						<p>Join Brewhub to manage your coffee shop essentials</p>
 					</header>
 
-					<form action="Login.php" method="post" autocomplete="off">
+					<form action="signUp-validate.php" method="POST" autocomplete="off">
 						<div class="mb-2">
 							<label for="fullname" class="form-label">Full Name</label>
 							<input id="fullname" name="fullname" type="text" class="form-control" autocomplete="name" required>
@@ -34,6 +34,11 @@
 						<div class="mb-2">
 							<label for="username" class="form-label">Username</label>
 							<input id="username" name="username" type="text" class="form-control" required>
+						</div>
+
+						<div class="mb-3">
+							<label for="email" class="form-label">Email</label>
+							<input id="email" name="email" type="email" class="form-control border-0 border-bottom rounded-0" required>
 						</div>
 
 						<div class="mb-3">
@@ -46,8 +51,7 @@
 
 					<div class="or-divider" aria-hidden="true"><span>OR</span></div>
 
-					<div class="social-row">
-						<a class="social-btn" href="#"><i class="bi bi-facebook"></i> Sign in with Facebook</a>
+					<div class="social-row"> 	
 						<a class="social-btn" href="#"><i class="bi bi-google"></i> Sign in with Google</a>
 					</div>
 
