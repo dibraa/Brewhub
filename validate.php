@@ -58,3 +58,5 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }
     $conn->close();
 }
+
+// mag add pako condition for different user (buyer or seller).
