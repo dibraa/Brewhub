@@ -11,6 +11,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 	<link href="Style.css" rel="stylesheet">
 </head>
+
 <body class="auth-page">
 	<main class="auth-card container-fluid p-0">
 		<div class="row g-0 h-100">
@@ -25,7 +26,61 @@
 						<p>Join Brewhub to manage your coffee shop essentials</p>
 					</header>
 
-					<form action="signUp-validate.php" method="POST" autocomplete="off">
+					<form id="signupForm" method="POST" autocomplete="off">
+						
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+	document.getElementById('signupForm').addEventListener('submit', function(e) {
+		e.preventDefault(); 
+
+		const formData = new FormData(this);
+
+		fetch('signUp-validate.php', {
+			method: 'POST',
+			body: formData
+		})
+
+		.then(response => response.json())
+		.then(data => {
+			if(data.status === 'success'){
+				Swal.fire({
+					icon: 'success',
+					title: 'Welcome to BrewHub!',
+					text: data.message,
+					confirmButtonText: 'Go to Login',
+					confirmButtonColor: '#3085d6'
+				}).then(() => {
+					window.location.href = 'Login.php';
+				});
+			} else if (data.status === 'exists'){
+				Swal.fire({
+					icon: 'warning',
+					title: 'Email Already Exists!',
+					text: data.message,
+					confirmButtonText: 'Try again',
+					confirmButtonColor: '#f0ad4e'
+				});
+			} else {
+				Swal.fire({
+					icon: 'error',
+					title: 'Oops!',
+					text: data.message,
+					confirmButtonText: 'OK',
+					confirmButtonColor: '#d33'
+				});
+			}
+		})
+		.catch(error => {
+			Swal.fire({
+				icon: 'error',
+				title: 'Connection Error',
+				text: 'Could not connect to server.',
+				confirmButtonColor: '#d33'
+			});
+		});
+	});
+</script>
+
 						<div class="mb-2">
 							<label for="fullname" class="form-label">Full Name</label>
 							<input id="fullname" name="fullname" type="text" class="form-control" autocomplete="name" required>
