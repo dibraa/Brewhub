@@ -32,8 +32,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
        
         $stmt->close();
 
-        $stmt = $conn->prepare("INSERT INTO users (name, email, password, username) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $name, $email, $hashed_password, $username);
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password, username, role) VALUES (?, ?, ?, ?, ?)");
+        $role = 'buyer';
+        $stmt->bind_param("sssss", $name, $email, $hashed_password, $username, $role);
 
         if($stmt->execute()){
             echo json_encode(['status' => 'success', 'message' => 'Account created successfully!']);
