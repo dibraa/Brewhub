@@ -14,7 +14,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     
     if(isset($_POST['email']) && isset($_POST['password']) && !empty($_POST['email']) && !empty($_POST['password'])){
 
-    $sql = "SELECT ID, email, name, password, username FROM users where email = ?";
+    $sql = "SELECT ID, email, name, password, username, role FROM users where email = ?";
 
     if($stmt = $conn->prepare($sql)){
         $stmt->bind_param("s", $param_email);
@@ -27,7 +27,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
             if($stmt->num_rows == 1){
 
-                $stmt->bind_result($ID,$email,$name,$username,$hashed_password);
+                $stmt->bind_result($ID, $email, $name, $hashed_password, $username, $role);
 
                 if($stmt->fetch()){
                     
@@ -38,20 +38,32 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         $_SESSION['email'] = $email;
                         $_SESSION['fullname'] = $name;
                         $_SESSION['username'] = $username;
+                        $_SESSION['role'] = $role;
+
+                        if(empty($role)) $role = 'buyer';
+
+                        if($role == 'admin'){
+                            echo json_encode(['status' => 'success', 'redirect' => 'admin/admin.php']);
+                        } else if ($role == 'seller'){
+                            echo json_encode(['status' => 'success', 'redirect' => 'Seller/SellerDashboard.php']);
+                        } else {
+                            echo json_encode(['status' => 'success', 'redirect' => 'Buyer/Buyer_DashBoard.php']);
+                        }
+                        exit();
                         
 
-                        header("Location: Buyer/Buyer_Dashboard.php");
-                        exit();
+                        // header("Location: Buyer/Buyer_Dashboard.php");
+                        // exit();
 
                     } else {
-                        echo ('Invalid Email or Password');
+                        echo json_encode(['status' => 'error', 'message' => 'Invalid email or password']);
                     }
                 } 
             } else {
-                echo ('Invalid email or password');
+                echo json_encode(['status' => 'error', 'message' => 'Invalid email or password']);
             }
         } else {
-            echo ('something went wrong');
+           echo json_encode(['status' => 'error', 'message' => 'Something went wrong!']);
         }
           $stmt->close();
     } 

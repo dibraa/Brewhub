@@ -27,13 +27,16 @@
 						<p>Your Shop's One-Stop Supply</p>
 					</header>
 
-					<form action="Buyer/Buyer_Dashboard.php" method="post" autocomplete="off">
-						<div class="mb-2">
+					<form id="loginForm" method="post" autocomplete="off">
+					
+					<div id="errorMsg" style="display:none;" class="alert alert-danger py-2" role="alert">Invalid email or password!</div>
+
+					<div class="mb-3">
 							<label for="email" class="form-label">Email</label>
 							<input id="email" name="email" type="email" class="form-control" required>
 						</div>
 
-						<div class="mb-0">
+						<div class="mb-3">
 							<label for="password" class="form-label">Password</label>
 							<input id="password" name="password" type="password" class="form-control border-0 border-bottom rounded-0"  required>
 						</div>
@@ -56,5 +59,34 @@
 			</section>
 		</div>
 	</main>
+
+	<script>
+		document.getElementById('loginForm').addEventListener('submit', function(e){
+			e.preventDefault();
+
+			const formData = new FormData(this);
+
+			fetch('validate.php', {
+				method: "POST",
+				body: formData
+			})
+			.then(response => response.json())
+			.then(data => {
+				if(data.status === 'success'){
+					window.location.href = data.redirect;
+				} else {
+					const errorMsg = document.getElementById('errorMsg');
+					errorMsg.style.display = 'block';
+					errorMsg.textContent = data.message;
+				}
+			})
+			.catch(error => {
+				const errorMsg = document.getElementById('errorMsg');
+				errorMsg.style.display = 'block';
+				errorMsg.textContent = 'Wrong credentials. Please try again.';
+			});
+		});
+	</script>
+
 </body>
 </html>
