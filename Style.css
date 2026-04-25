@@ -117,6 +117,9 @@ body.auth-page .form-control[type="password"] {
 	font-size: 0.68rem;
 	color: #000000;
 }
+.forgot-link:hover{
+	color: var(--btn-primary);
+}
 
 .btn-login {
 	background-color: var(--btn-primary);
