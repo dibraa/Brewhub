@@ -50,11 +50,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             echo json_encode(['status' => 'success', 'redirect' => 'Buyer/Buyer_DashBoard.php']);
                         }
                         exit();
-                        
-
-                        // header("Location: Buyer/Buyer_Dashboard.php");
-                        // exit();
-
+                
                     } else {
                         echo json_encode(['status' => 'error', 'message' => 'Invalid email or password']);
                     }
