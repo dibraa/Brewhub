@@ -42,7 +42,7 @@
 						</div>
 
 						<div class="text-end mb-3">
-							<a href="#" class="forgot-link">Forgot your password?</a>
+							<a href="ForgotPassword.php" class="forgot-link">Forgot your password?</a>
 						</div>
 
 						<button type="submit" class="btn btn-login w-100">Log In</button>
