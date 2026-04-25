@@ -56,13 +56,6 @@
 									<p class="profile-kicker mb-2"><i class="bi bi-cup-hot me-2"></i>Brewhub Account</p>
 									<h1 class="profile-title h3 mb-0">My Profile</h1>
 								</div>
-								<div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
-									<span class="badge rounded-pill profile-status-badge"><i class="bi bi-person-check-fill me-1"></i>Buyer</span>
-									<select class="form-select form-select-sm profile-status-select" aria-label="Account role">
-										<option selected>Buyer</option>
-										<option>Seller</option>
-									</select>
-								</div>
 							</div>
 
 							<div class="profile-info-list mb-4">
@@ -80,9 +73,12 @@
 								</div>
 							</div>
 
-							<div class="d-flex flex-column flex-sm-row gap-3">
-								<a class="btn profile-btn profile-btn-edit" href="#"><i class="bi bi-pencil-square me-2"></i>Edit Profile</a>
-								<a class="btn profile-btn profile-btn-seller" href="BecomeSeller.php?fullname=dib;email=dave%40brewhub.com"><i class="bi bi-shop me-2"></i>Become a Seller</a>
+							<div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-3">
+								<div class="d-flex flex-column flex-sm-row gap-3">
+									<a class="btn profile-btn profile-btn-edit" href="#"><i class="bi bi-pencil-square me-2"></i>Edit Profile</a>
+									<a class="btn profile-btn profile-btn-seller" href="BecomeSeller.php?fullname=dib;email=dave%40brewhub.com"><i class="bi bi-shop me-2"></i>Become a Seller</a>
+								</div>
+								<a class="btn profile-btn profile-btn-edit" href="Login.php"><i class="bi bi-box-arrow-right me-2"></i>Log out</a>
 							</div>
 						</div>
 					</section>
@@ -91,43 +87,30 @@
 		</div>
 	</main>
 
-	<footer class="bh-footer py-5 px-4 px-lg-5 mt-5">
-		<div class="container-fluid bh-footer-container">
-			<div class="row g-4 g-lg-5">
-				<div class="col-12 col-md-3">
-					<a class="bh-footer-brand" href="#">Brewhub</a>
-					<img src="Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3">
-				</div>
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Shop</h4>
-					<a class="bh-footer-link" href="#">All Coffee</a>
-					<a class="bh-footer-link" href="#">Equipment</a>
-					<a class="bh-footer-link" href="#">Cups & Packaging</a>
-					<a class="bh-footer-link" href="#">Pastries</a>
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+		<div class="container-fluid bh-footer-bar-container">
+			<div class="bh-footer-bar-left">
+				<div class="bh-footer-bar-logo-box">
+					<img src="Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-bar-logo">
 				</div>
 
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Experience</h4>
-					<a class="bh-footer-link" href="#">Brew Guides</a>
-					<a class="bh-footer-link" href="#">Journal</a>
-					<a class="bh-footer-link" href="#">Wholesale</a>
-				</div>
-
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Legal</h4>
-					<a class="bh-footer-link" href="#">Privacy Policy</a>
-					<a class="bh-footer-link" href="#">Terms of Service</a>
-					<a class="bh-footer-link" href="#">Shipping & Returns</a>
+				<div class="bh-footer-bar-meta">
+					<div class="bh-footer-bar-copy">&copy; 2026 Brewhub</div>
+					<div class="bh-footer-bar-legal" aria-label="Legal links">
+						<a class="bh-footer-bar-legal-link" href="#">Terms</a>
+						<a class="bh-footer-bar-legal-link" href="#">Privacy</a>
+						<a class="bh-footer-bar-legal-link" href="#">Cookies</a>
+					</div>
 				</div>
 			</div>
 
-			<div class="bh-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-5 pt-4">
-				<p class="bh-footer-copy mb-0">&copy; 2024 Brewhub Editorial. All rights reserved.</p>
-				<div class="d-flex gap-3 mt-3 mt-md-0">
-					<a class="bh-footer-social" href="#" aria-label="Share"><i class="bi bi-share"></i></a>
-					<a class="bh-footer-social" href="#" aria-label="Language"><i class="bi bi-globe2"></i></a>
-				</div>
-			</div>
+			<nav class="bh-footer-bar-nav" aria-label="Footer navigation">
+				<a class="bh-footer-bar-link" href="Buyer/Dashboard.php">Home</a>
+				<a class="bh-footer-bar-link" href="Buyer/CoffeeIngredients.php">Coffee &amp; Ingredients</a>
+				<a class="bh-footer-bar-link" href="Buyer/CupsPackaging.php">Cups &amp; Packaging</a>
+				<a class="bh-footer-bar-link" href="Buyer/Equipments.php">Equipments</a>
+				<a class="bh-footer-bar-link" href="Buyer/Pastry.php">Pastry</a>
+			</nav>
 		</div>
 	</footer>
 

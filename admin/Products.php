@@ -81,12 +81,14 @@ $products = (array) $_SESSION['bh_admin_demo_products'];
 	<link href="../Style.css?v=20260420" rel="stylesheet">
 </head>
 
-<body class="admin-page">
-	<nav class="navbar navbar-expand-md navbar-light fixed-top bh-navbar">
-		<div class="container-fluid px-4 px-lg-5 bh-nav-container">
-			<a class="navbar-brand bh-brand" href="admin.php">Brewhub</a>
-
-			<div class="d-flex align-items-center gap-2 order-md-3 bh-nav-actions">
+<body class="admin-page admin-sidebar-layout">
+	<nav class="admin-topbar">
+		<div class="admin-topbar-container">
+			<button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+				<i class="bi bi-list"></i>
+			</button>
+			<a class="admin-topbar-brand" href="admin.php">Brewhub Admin</a>
+			<div class="admin-topbar-actions">
 				<a class="btn bh-icon-btn position-relative" href="#" aria-label="Notifications">
 					<i class="bi bi-bell"></i>
 					<span class="bh-cart-count" aria-hidden="true">3</span>
@@ -94,35 +96,41 @@ $products = (array) $_SESSION['bh_admin_demo_products'];
 				<a class="btn bh-icon-btn" href="#" aria-label="Settings">
 					<i class="bi bi-gear"></i>
 				</a>
-				<a class="btn bh-icon-btn" href="../Profile.php" aria-label="Profile">
-					<i class="bi bi-person"></i>
-				</a>
-
-				<button class="navbar-toggler border-0 shadow-none p-0 ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-			</div>
-
-			<div class="collapse navbar-collapse justify-content-center order-md-2" id="adminNavbar">
-				<ul class="navbar-nav align-items-md-center gap-md-4 gap-lg-5 bh-nav-links">
-					<li class="nav-item">
-						<a class="nav-link" href="admin.php">Dashboard</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="admin.php#user-management">User Management</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="admin.php#seller-requests">Seller Requests</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link active" aria-current="page" href="Products.php">Products</a>
-					</li>
-				</ul>
 			</div>
 		</div>
 	</nav>
 
-	<main class="admin-main">
+	<aside class="admin-sidebar" id="adminSidebar">
+		<div class="admin-sidebar-header">
+			<a class="admin-sidebar-brand" href="admin.php">Brewhub</a>
+		</div>
+		<nav class="admin-sidebar-nav">
+			<a class="admin-sidebar-link" href="admin.php">
+				<i class="bi bi-speedometer2"></i>
+				<span>Dashboard</span>
+			</a>
+			<a class="admin-sidebar-link" href="UserManagement.php">
+				<i class="bi bi-people"></i>
+				<span>User Management</span>
+			</a>
+			<a class="admin-sidebar-link" href="SellerRequests.php">
+				<i class="bi bi-shop"></i>
+				<span>Seller Requests</span>
+			</a>
+			<a class="admin-sidebar-link active" href="Products.php">
+				<i class="bi bi-box-seam"></i>
+				<span>Products</span>
+			</a>
+		</nav>
+		<div class="admin-sidebar-footer">
+			<a class="admin-sidebar-logout" href="../Login.php">
+				<i class="bi bi-box-arrow-right"></i>
+				<span>Logout</span>
+			</a>
+		</div>
+	</aside>
+
+	<main class="admin-main admin-main-with-sidebar">
 		<section class="admin-dashboard py-5">
 			<div class="container-fluid px-4 px-lg-5">
 				<div class="admin-dashboard-header mb-4">
@@ -194,32 +202,40 @@ $products = (array) $_SESSION['bh_admin_demo_products'];
 		</section>
 	</main>
 
-	<footer class="bh-footer py-5 px-4 px-lg-5 mt-5">
-		<div class="container-fluid bh-footer-container">
-			<div class="row g-4 g-lg-5">
-				<div class="col-12 col-md-3">
-					<a class="bh-footer-brand" href="admin.php">Brewhub</a>
-					<img src="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3">
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+		<div class="container-fluid bh-footer-bar-container">
+			<div class="bh-footer-bar-left">
+				<div class="bh-footer-bar-logo-box">
+					<img src="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-bar-logo">
 				</div>
 
-				<div class="col-12 col-md-9 d-flex flex-wrap align-items-start justify-content-md-end gap-3 gap-md-4">
-					<a class="bh-footer-link" href="admin.php">Dashboard</a>
-					<a class="bh-footer-link" href="admin.php#user-management">User Management</a>
-					<a class="bh-footer-link" href="admin.php#seller-requests">Seller Requests</a>
-					<a class="bh-footer-link" href="Products.php">Products</a>
+				<div class="bh-footer-bar-meta">
+					<div class="bh-footer-bar-copy">&copy; 2026 Brewhub Admin</div>
+					<div class="bh-footer-bar-legal" aria-label="Legal links">
+						<a class="bh-footer-bar-legal-link" href="#">Terms</a>
+						<a class="bh-footer-bar-legal-link" href="#">Privacy</a>
+						<a class="bh-footer-bar-legal-link" href="#">Cookies</a>
+					</div>
 				</div>
 			</div>
 
-			<div class="bh-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-5 pt-4">
-				<p class="bh-footer-copy mb-0">&copy; 2026 Brewhub Admin. All rights reserved.</p>
-				<div class="d-flex gap-3 mt-3 mt-md-0">
-					<a class="bh-footer-social" href="#" aria-label="Share"><i class="bi bi-share"></i></a>
-					<a class="bh-footer-social" href="#" aria-label="Language"><i class="bi bi-globe2"></i></a>
-				</div>
-			</div>
+			<nav class="bh-footer-bar-nav" aria-label="Footer navigation">
+				<a class="bh-footer-bar-link" href="admin.php">Dashboard</a>
+				<a class="bh-footer-bar-link" href="UserManagement.php">User Management</a>
+				<a class="bh-footer-bar-link" href="SellerRequests.php">Seller Requests</a>
+				<a class="bh-footer-bar-link" href="Products.php">Products</a>
+			</nav>
 		</div>
 	</footer>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script>
+		const sidebarToggle = document.getElementById('sidebarToggle');
+		const body = document.body;
+
+		sidebarToggle.addEventListener('click', () => {
+			body.classList.toggle('admin-sidebar-collapsed');
+		});
+	</script>
 </body>
 </html>

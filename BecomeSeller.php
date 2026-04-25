@@ -1,6 +1,16 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+	session_start();
+}
+
 $fullName = isset($_GET['fullname']) && $_GET['fullname'] !== '' ? $_GET['fullname'] : 'Ariana Cruz';
 $email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'ariana.cruz@brewhub.com';
+
+if (!isset($_SESSION['bh_cart']) || !is_array($_SESSION['bh_cart'])) {
+	$_SESSION['bh_cart'] = [];
+}
+
+$cartCount = array_sum(array_map('intval', (array) $_SESSION['bh_cart']));
 ?>
 <!DOCTYPE html>
 <html>
@@ -10,7 +20,7 @@ $email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'aria
 	<title>Apply to Become a Seller</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-	<link href="Style.css" rel="stylesheet">
+	<link href="Style.css?v=20260423" rel="stylesheet">
 </head>
 <body class="dashboard-page">
 	<nav class="navbar navbar-expand-md navbar-light fixed-top bh-navbar">
@@ -21,9 +31,9 @@ $email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'aria
 				<a class="btn bh-icon-btn" href="Profile.php" aria-label="Profile">
 					<i class="bi bi-person"></i>
 				</a>
-				<a class="btn bh-icon-btn position-relative" href="#" aria-label="Cart">
+				<a class="btn bh-icon-btn position-relative" href="Buyer/Cart.php" aria-label="Cart">
 					<i class="bi bi-bag"></i>
-					<span class="bh-cart-count">2</span>
+					<span class="bh-cart-count"><?php echo (int) $cartCount; ?></span>
 				</a>
 				<button class="navbar-toggler border-0 shadow-none p-0 ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
@@ -38,11 +48,14 @@ $email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'aria
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="productCategoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Product Categories</a>
 						<ul class="dropdown-menu" aria-labelledby="productCategoriesDropdown">
-							<li><a class="dropdown-item" href="#">Coffee & Ingredients</a></li>
-							<li><a class="dropdown-item" href="#">Cups & Packaging</a></li>
-							<li><a class="dropdown-item" href="#">Equipments</a></li>
-							<li><a class="dropdown-item" href="#">Pastry</a></li>
+							<li><a class="dropdown-item" href="Buyer/CoffeeIngredients.php">Coffee &amp; Ingredients</a></li>
+							<li><a class="dropdown-item" href="Buyer/CupsPackaging.php">Cups &amp; Packaging</a></li>
+							<li><a class="dropdown-item" href="Buyer/Equipments.php">Equipments</a></li>
+							<li><a class="dropdown-item" href="Buyer/Pastry.php">Pastry</a></li>
 						</ul>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="Buyer/Orders.php">Orders</a>
 					</li>
 				</ul>
 			</div>
@@ -118,43 +131,31 @@ $email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'aria
 		</div>
 	</main>
 
-	<footer class="bh-footer py-5 px-4 px-lg-5 mt-5">
-		<div class="container-fluid bh-footer-container">
-			<div class="row g-4 g-lg-5">
-				<div class="col-12 col-md-3">
-					<a class="bh-footer-brand" href="#">Brewhub</a>
-					<img src="Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3">
-				</div>
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Shop</h4>
-					<a class="bh-footer-link" href="#">All Coffee</a>
-					<a class="bh-footer-link" href="#">Equipment</a>
-					<a class="bh-footer-link" href="#">Cups & Packaging</a>
-					<a class="bh-footer-link" href="#">Pastries</a>
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+		<div class="container-fluid bh-footer-bar-container">
+			<div class="bh-footer-bar-left">
+				<div class="bh-footer-bar-logo-box">
+					<img src="Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-bar-logo">
 				</div>
 
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Experience</h4>
-					<a class="bh-footer-link" href="#">Brew Guides</a>
-					<a class="bh-footer-link" href="#">Journal</a>
-					<a class="bh-footer-link" href="#">Wholesale</a>
-				</div>
-
-				<div class="col-6 col-md-3 d-flex flex-column gap-3">
-					<h4 class="bh-footer-heading mb-0">Legal</h4>
-					<a class="bh-footer-link" href="#">Privacy Policy</a>
-					<a class="bh-footer-link" href="#">Terms of Service</a>
-					<a class="bh-footer-link" href="#">Shipping & Returns</a>
+				<div class="bh-footer-bar-meta">
+					<div class="bh-footer-bar-copy">&copy; 2026 Brewhub</div>
+					<div class="bh-footer-bar-legal" aria-label="Legal links">
+						<a class="bh-footer-bar-legal-link" href="#">Terms</a>
+						<a class="bh-footer-bar-legal-link" href="#">Privacy</a>
+						<a class="bh-footer-bar-legal-link" href="#">Cookies</a>
+					</div>
 				</div>
 			</div>
 
-			<div class="bh-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-5 pt-4">
-				<p class="bh-footer-copy mb-0">&copy; 2024 Brewhub Editorial. All rights reserved.</p>
-				<div class="d-flex gap-3 mt-3 mt-md-0">
-					<a class="bh-footer-social" href="#" aria-label="Share"><i class="bi bi-share"></i></a>
-					<a class="bh-footer-social" href="#" aria-label="Language"><i class="bi bi-globe2"></i></a>
-				</div>
-			</div>
+			<nav class="bh-footer-bar-nav" aria-label="Footer navigation">
+				<a class="bh-footer-bar-link" href="Buyer/Dashboard.php">Home</a>
+				<a class="bh-footer-bar-link" href="Buyer/Orders.php">Orders</a>
+				<a class="bh-footer-bar-link" href="Buyer/CoffeeIngredients.php">Coffee &amp; Ingredients</a>
+				<a class="bh-footer-bar-link" href="Buyer/CupsPackaging.php">Cups &amp; Packaging</a>
+				<a class="bh-footer-bar-link" href="Buyer/Equipments.php">Equipments</a>
+				<a class="bh-footer-bar-link" href="Buyer/Pastry.php">Pastry</a>
+			</nav>
 		</div>
 	</footer>
 
