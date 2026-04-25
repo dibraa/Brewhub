@@ -28,8 +28,6 @@
 					</header>
 
 					<form id="loginForm" method="post" autocomplete="off">
-					
-					<div id="errorMsg" style="display:none;" class="alert alert-danger py-2" role="alert">Invalid email or password!</div>
 
 					<div class="mb-3">
 							<label for="email" class="form-label">Email</label>
@@ -60,6 +58,20 @@
 		</div>
 	</main>
 
+	<!-- Error Toast -->
+	<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+		<div id="errorToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+				<div class="toast-body">
+					<i class="bi bi-exclamation-circle me-2"></i>
+					<span id="toastMessage">Invalid email or password</span>
+				</div>
+				<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<script>
 		document.getElementById('loginForm').addEventListener('submit', function(e){
 			e.preventDefault();
@@ -75,15 +87,19 @@
 				if(data.status === 'success'){
 					window.location.href = data.redirect;
 				} else {
-					const errorMsg = document.getElementById('errorMsg');
-					errorMsg.style.display = 'block';
-					errorMsg.textContent = data.message;
+					const toastEl = document.getElementById('errorToast');
+					const toastMessage = document.getElementById('toastMessage');
+					toastMessage.textContent = data.message;
+					const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+					toast.show();
 				}
 			})
 			.catch(error => {
-				const errorMsg = document.getElementById('errorMsg');
-				errorMsg.style.display = 'block';
-				errorMsg.textContent = 'Wrong credentials. Please try again.';
+				const toastEl = document.getElementById('errorToast');
+				const toastMessage = document.getElementById('toastMessage');
+				toastMessage.textContent = 'Wrong credentials. Please try again.';
+				const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+				toast.show();
 			});
 		});
 	</script>
