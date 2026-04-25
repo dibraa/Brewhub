@@ -42,7 +42,7 @@
 						</div>
 
 						<div class="text-end mb-3">
-							<a href="ForgotPassword.php" class="forgot-link link-underline-opacity-0 link-underline-opacity-100-hover">Forgot your password?</a>
+							<a href="ForgotPassword.php" class="forgot-link link-underline link-underline-opacity-0 link-underline-opacity-100-hover">Forgot your password?</a>
 						</div>
 
 						<button type="submit" class="btn btn-login w-100">Log In</button>
