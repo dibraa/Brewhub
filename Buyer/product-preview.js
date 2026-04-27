@@ -10,6 +10,16 @@
   const addProductId = document.getElementById('bhPreviewAddProductId');
   const buyProductId = document.getElementById('bhPreviewBuyProductId');
 
+  const addName = document.getElementById('bhPreviewAddProductName');
+  const addCategory = document.getElementById('bhPreviewAddProductCategory');
+  const addPrice = document.getElementById('bhPreviewAddProductPrice');
+  const addImage = document.getElementById('bhPreviewAddProductImage');
+
+  const buyName = document.getElementById('bhPreviewBuyProductName');
+  const buyCategory = document.getElementById('bhPreviewBuyProductCategory');
+  const buyPrice = document.getElementById('bhPreviewBuyProductPrice');
+  const buyImage = document.getElementById('bhPreviewBuyProductImage');
+
   if (!cards.length || !backdrop || !closeBtn || !img || !title || !price || !category || !description || !addProductId || !buyProductId) {
     return;
   }
@@ -26,6 +36,16 @@
     img.alt = data.name || 'Product image';
     addProductId.value = data.productId || '';
     buyProductId.value = data.productId || '';
+
+    if (addName) addName.value = data.name || '';
+    if (addCategory) addCategory.value = data.category || '';
+    if (addPrice) addPrice.value = (data.rawPrice || data.price || '').toString().replace(/^₱\s*/i, '');
+    if (addImage) addImage.value = data.image || '';
+
+    if (buyName) buyName.value = data.name || '';
+    if (buyCategory) buyCategory.value = data.category || '';
+    if (buyPrice) buyPrice.value = (data.rawPrice || data.price || '').toString().replace(/^₱\s*/i, '');
+    if (buyImage) buyImage.value = data.image || '';
 
     lastActiveCard = card;
     backdrop.hidden = false;

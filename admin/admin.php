@@ -1,145 +1,85 @@
 <?php
 declare(strict_types=1);
 
-function bh_env(string $key, string $default): string
-{
-	$value = getenv($key);
-	if ($value === false || $value === '') {
-		return $default;
+session_start();
+
+$usersRaw = $_SESSION['bh_users'] ?? [];
+$productsRaw = $_SESSION['bh_products'] ?? [];
+$requestsRaw = $_SESSION['bh_seller_requests'] ?? [];
+
+$usersRaw = is_array($usersRaw) ? array_values($usersRaw) : [];
+$productsRaw = is_array($productsRaw) ? array_values($productsRaw) : [];
+$requestsRaw = is_array($requestsRaw) ? array_values($requestsRaw) : [];
+
+$totalUsers = 0;
+$totalSellers = 0;
+$recentUsers = [];
+foreach ($usersRaw as $u) {
+	if (!is_array($u)) {
+		continue;
 	}
-	return $value;
+	$id = (int) ($u['id'] ?? $u['ID'] ?? 0);
+	if ($id <= 0) {
+		continue;
+	}
+	$totalUsers++;
+	$role = strtolower((string) ($u['role'] ?? ''));
+	if ($role === 'seller') {
+		$totalSellers++;
+	}
+	$recentUsers[] = [
+		'id' => $id,
+		'name' => (string) ($u['username'] ?? $u['name'] ?? ''),
+		'email' => (string) ($u['email'] ?? ''),
+		'role' => (string) ($u['role'] ?? ''),
+		'status' => (string) ($u['status'] ?? 'Active'),
+	];
 }
 
-function bh_db_connect(): ?mysqli
-{
-	mysqli_report(MYSQLI_REPORT_OFF);
-
-	$host = bh_env('BREWHUB_DB_HOST', '127.0.0.1');
-	$user = bh_env('BREWHUB_DB_USER', 'root');
-	$pass = bh_env('BREWHUB_DB_PASS', '');
-	$name = bh_env('BREWHUB_DB_NAME', 'brewhub');
-	$port = (int) bh_env('BREWHUB_DB_PORT', '3306');
-
-	$db = @new mysqli($host, $user, $pass, $name, $port);
-	if ($db && !$db->connect_errno) {
-		@$db->set_charset('utf8mb4');
-		return $db;
+$totalProducts = 0;
+foreach ($productsRaw as $p) {
+	if (!is_array($p)) {
+		continue;
 	}
-
-	$unknownDb = $db && ($db->connect_errno === 1049);
-	if ($unknownDb) {
-		$serverOnly = @new mysqli($host, $user, $pass, '', $port);
-		if ($serverOnly && !$serverOnly->connect_errno) {
-			@$serverOnly->set_charset('utf8mb4');
-			return $serverOnly;
-		}
+	$id = (int) ($p['id'] ?? 0);
+	if ($id <= 0) {
+		continue;
 	}
-
-	return null;
+	$totalProducts++;
 }
 
-function bh_count_table(mysqli $db, string $table, ?string $whereSql = null): ?int
-{
-	$sql = "SELECT COUNT(*) AS c FROM `{$table}`";
-	if ($whereSql) {
-		$sql .= " WHERE {$whereSql}";
+$pendingRequests = 0;
+$recentRequests = [];
+foreach ($requestsRaw as $r) {
+	if (!is_array($r)) {
+		continue;
 	}
-	$result = @$db->query($sql);
-	if (!$result) {
-		return null;
+	$id = (int) ($r['id'] ?? $r['request_id'] ?? 0);
+	if ($id <= 0) {
+		continue;
 	}
-	$row = $result->fetch_assoc();
-	$result->free();
-	if (!$row || !isset($row['c'])) {
-		return null;
+	$status = strtolower((string) ($r['status'] ?? 'Pending'));
+	if ($status === 'pending') {
+		$pendingRequests++;
 	}
-	return (int) $row['c'];
+	$recentRequests[] = [
+		'id' => $id,
+		'seller' => (string) ($r['username'] ?? $r['seller'] ?? $r['name'] ?? ''),
+		'shop' => (string) ($r['shop_name'] ?? $r['shop'] ?? ''),
+		'created_at' => (string) ($r['created_at'] ?? ''),
+		'status' => (string) ($r['status'] ?? 'Pending'),
+	];
 }
 
-function bh_column_exists(mysqli $db, string $table, string $column): bool
-{
-	$result = @$db->query("SHOW COLUMNS FROM `{$table}` LIKE '" . $db->real_escape_string($column) . "'");
-	if (!$result) {
-		return false;
-	}
-	$exists = $result->num_rows > 0;
-	$result->free();
-	return $exists;
-}
-
-$db = bh_db_connect();
-
-$demoTotals = [
-	'total_users' => 124,
-	'total_sellers' => 18,
-	'total_products' => 392,
-	'pending_requests' => 6,
-];
-
-$totals = [
-	'total_users' => null,
-	'total_sellers' => null,
-	'total_products' => null,
-	'pending_requests' => null,
-];
-
-$temporaryStats = true;
-
-if ($db) {
-	$totals['total_users'] = bh_count_table($db, 'users')
-		?? bh_count_table($db, 'user')
-		?? bh_count_table($db, 'accounts');
-
-	$totals['total_products'] = bh_count_table($db, 'products')
-		?? bh_count_table($db, 'product')
-		?? bh_count_table($db, 'items');
-
-	$totals['total_sellers'] = bh_count_table($db, 'sellers')
-		?? bh_count_table($db, 'seller');
-
-	if ($totals['total_sellers'] === null && $totals['total_users'] !== null && bh_column_exists($db, 'users', 'role')) {
-		$totals['total_sellers'] = bh_count_table($db, 'users', "role IN ('seller','Seller')");
-	}
-
-	$totals['pending_requests'] = bh_count_table($db, 'seller_requests', "status IN ('pending','Pending')")
-		?? bh_count_table($db, 'seller_request', "status IN ('pending','Pending')")
-		?? bh_count_table($db, 'sellerrequests', "status IN ('pending','Pending')");
-
-	$allLive = true;
-	foreach ($totals as $v) {
-		if ($v === null) {
-			$allLive = false;
-			break;
-		}
-	}
-
-	if ($allLive) {
-		$temporaryStats = false;
-	} else {
-		$demoQuery = @$db->query('SELECT 124 AS total_users, 18 AS total_sellers, 392 AS total_products, 6 AS pending_requests');
-		if ($demoQuery) {
-			$demoRow = $demoQuery->fetch_assoc();
-			$demoQuery->free();
-			if (is_array($demoRow)) {
-				$demoTotals['total_users'] = (int) ($demoRow['total_users'] ?? $demoTotals['total_users']);
-				$demoTotals['total_sellers'] = (int) ($demoRow['total_sellers'] ?? $demoTotals['total_sellers']);
-				$demoTotals['total_products'] = (int) ($demoRow['total_products'] ?? $demoTotals['total_products']);
-				$demoTotals['pending_requests'] = (int) ($demoRow['pending_requests'] ?? $demoTotals['pending_requests']);
-			}
-		}
-	}
-}
+$recentUsers = array_slice(array_reverse($recentUsers), 0, 3);
+$recentRequests = array_slice(array_reverse($recentRequests), 0, 3);
 
 $finalTotals = [
-	'total_users' => $totals['total_users'] ?? $demoTotals['total_users'],
-	'total_sellers' => $totals['total_sellers'] ?? $demoTotals['total_sellers'],
-	'total_products' => $totals['total_products'] ?? $demoTotals['total_products'],
-	'pending_requests' => $totals['pending_requests'] ?? $demoTotals['pending_requests'],
+	'total_users' => (int) $totalUsers,
+	'total_sellers' => (int) $totalSellers,
+	'total_products' => (int) $totalProducts,
+	'pending_requests' => (int) $pendingRequests,
 ];
-
-if ($db) {
-	@$db->close();
-}
 ?>
 
 <!DOCTYPE html>
@@ -259,7 +199,7 @@ if ($db) {
 									<span class="admin-card-icon"><i class="bi bi-people"></i></span>
 									<h3 class="admin-card-title mb-0">User Management</h3>
 								</div>
-								<a class="admin-card-link" href="#">View all</a>
+								<a class="admin-card-link" href="UserManagement.php">View all</a>
 							</div>
 							<div class="table-responsive">
 								<table class="table table-sm align-middle admin-table mb-0">
@@ -273,36 +213,29 @@ if ($db) {
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td class="fw-semibold">A. Santos</td>
-											<td class="text-muted">asantos@brewhub.com</td>
-											<td><span class="admin-badge">Buyer</span></td>
-											<td><span class="admin-status">Active</span></td>
-											<td class="text-end">
-												<button type="button" class="btn admin-btn admin-btn-ghost btn-sm"><i class="bi bi-eye me-1"></i>View</button>
-												<button type="button" class="btn admin-btn admin-btn-danger btn-sm"><i class="bi bi-trash3 me-1"></i>Remove</button>
-											</td>
-										</tr>
-										<tr>
-											<td class="fw-semibold">M. Reyes</td>
-											<td class="text-muted">mreyes@brewhub.com</td>
-											<td><span class="admin-badge">Seller</span></td>
-											<td><span class="admin-status admin-status-muted">Pending</span></td>
-											<td class="text-end">
-												<button type="button" class="btn admin-btn admin-btn-ghost btn-sm"><i class="bi bi-eye me-1"></i>View</button>
-												<button type="button" class="btn admin-btn admin-btn-danger btn-sm"><i class="bi bi-trash3 me-1"></i>Remove</button>
-											</td>
-										</tr>
-										<tr>
-											<td class="fw-semibold">J. Lim</td>
-											<td class="text-muted">jlim@brewhub.com</td>
-											<td><span class="admin-badge">Admin</span></td>
-											<td><span class="admin-status">Active</span></td>
-											<td class="text-end">
-												<button type="button" class="btn admin-btn admin-btn-ghost btn-sm"><i class="bi bi-eye me-1"></i>View</button>
-												<button type="button" class="btn admin-btn admin-btn-danger btn-sm"><i class="bi bi-trash3 me-1"></i>Remove</button>
-											</td>
-										</tr>
+										<?php if (count($recentUsers) === 0): ?>
+											<tr>
+												<td colspan="5" class="text-muted text-center py-4">No users found.</td>
+											</tr>
+										<?php else: ?>
+											<?php foreach ($recentUsers as $u): ?>
+												<?php
+													$name = (string) ($u['name'] ?? '');
+													$email = (string) ($u['email'] ?? '');
+													$role = (string) ($u['role'] ?? '');
+													$status = (string) ($u['status'] ?? 'Active');
+												?>
+												<tr>
+													<td class="fw-semibold"><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></td>
+													<td class="text-muted"><?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?></td>
+													<td><span class="admin-badge"><?php echo htmlspecialchars($role, ENT_QUOTES, 'UTF-8'); ?></span></td>
+													<td><span class="admin-status <?php echo strtolower($status) === 'pending' ? 'admin-status-muted' : ''; ?>"><?php echo htmlspecialchars($status, ENT_QUOTES, 'UTF-8'); ?></span></td>
+													<td class="text-end">
+														<a class="btn admin-btn admin-btn-ghost btn-sm" href="UserManagement.php"><i class="bi bi-eye me-1"></i>View</a>
+													</td>
+												</tr>
+											<?php endforeach; ?>
+										<?php endif; ?>
 									</tbody>
 								</table>
 							</div>
@@ -316,7 +249,7 @@ if ($db) {
 									<span class="admin-card-icon"><i class="bi bi-shop"></i></span>
 									<h3 class="admin-card-title mb-0">Seller Requests</h3>
 								</div>
-								<a class="admin-card-link" href="#">Review queue</a>
+								<a class="admin-card-link" href="SellerRequests.php">Review queue</a>
 							</div>
 							<div class="table-responsive">
 								<table class="table table-sm align-middle admin-table mb-0">
@@ -330,39 +263,30 @@ if ($db) {
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td class="fw-semibold">C. Garcia</td>
-											<td class="text-muted">BeanCraft Supplies</td>
-											<td class="text-muted">Apr 18</td>
-											<td><span class="admin-status admin-status-muted">Pending</span></td>
-											<td class="text-end">
-												<button type="button" class="btn admin-btn admin-btn-primary btn-sm"><i class="bi bi-check2-circle me-1"></i>Approve</button>
-												<button type="button" class="btn admin-btn admin-btn-ghost btn-sm"><i class="bi bi-eye me-1"></i>View</button>
-												<button type="button" class="btn admin-btn admin-btn-danger btn-sm"><i class="bi bi-x-circle me-1"></i>Remove</button>
-											</td>
-										</tr>
-										<tr>
-											<td class="fw-semibold">S. Dela Cruz</td>
-											<td class="text-muted">Cup & Co.</td>
-											<td class="text-muted">Apr 16</td>
-											<td><span class="admin-status admin-status-muted">Pending</span></td>
-											<td class="text-end">
-												<button type="button" class="btn admin-btn admin-btn-primary btn-sm"><i class="bi bi-check2-circle me-1"></i>Approve</button>
-												<button type="button" class="btn admin-btn admin-btn-ghost btn-sm"><i class="bi bi-eye me-1"></i>View</button>
-												<button type="button" class="btn admin-btn admin-btn-danger btn-sm"><i class="bi bi-x-circle me-1"></i>Remove</button>
-											</td>
-										</tr>
-										<tr>
-											<td class="fw-semibold">P. Navarro</td>
-											<td class="text-muted">GrindHouse Tools</td>
-											<td class="text-muted">Apr 14</td>
-											<td><span class="admin-status admin-status-muted">Pending</span></td>
-											<td class="text-end">
-												<button type="button" class="btn admin-btn admin-btn-primary btn-sm"><i class="bi bi-check2-circle me-1"></i>Approve</button>
-												<button type="button" class="btn admin-btn admin-btn-ghost btn-sm"><i class="bi bi-eye me-1"></i>View</button>
-												<button type="button" class="btn admin-btn admin-btn-danger btn-sm"><i class="bi bi-x-circle me-1"></i>Remove</button>
-											</td>
-										</tr>
+										<?php if (count($recentRequests) === 0): ?>
+											<tr>
+												<td colspan="5" class="text-muted text-center py-4">No seller requests found.</td>
+											</tr>
+										<?php else: ?>
+											<?php foreach ($recentRequests as $r): ?>
+												<?php
+													$seller = (string) ($r['seller'] ?? '');
+													$shop = (string) ($r['shop'] ?? '');
+													$status = (string) ($r['status'] ?? 'Pending');
+													$submitted = (string) ($r['created_at'] ?? '');
+													$submittedShort = $submitted !== '' ? date('M d', strtotime($submitted)) : '-';
+												?>
+												<tr>
+													<td class="fw-semibold"><?php echo htmlspecialchars($seller, ENT_QUOTES, 'UTF-8'); ?></td>
+													<td class="text-muted"><?php echo htmlspecialchars($shop, ENT_QUOTES, 'UTF-8'); ?></td>
+													<td class="text-muted"><?php echo htmlspecialchars($submittedShort, ENT_QUOTES, 'UTF-8'); ?></td>
+													<td><span class="admin-status <?php echo strtolower($status) === 'pending' ? 'admin-status-muted' : ''; ?>"><?php echo htmlspecialchars($status, ENT_QUOTES, 'UTF-8'); ?></span></td>
+													<td class="text-end">
+														<a class="btn admin-btn admin-btn-ghost btn-sm" href="SellerRequests.php"><i class="bi bi-eye me-1"></i>View</a>
+													</td>
+												</tr>
+											<?php endforeach; ?>
+										<?php endif; ?>
 									</tbody>
 								</table>
 							</div>

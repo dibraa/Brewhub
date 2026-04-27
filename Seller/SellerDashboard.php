@@ -1,9 +1,41 @@
 <?php
-// Temporary demo data for seller dashboard.
-// Replace these with database values once backend is ready.
-$totalSales = 18540.75;
-$totalOrders = 42;
-$totalProducts = 12;
+session_start();
+
+$sellerOrders = (array) ($_SESSION['seller_orders'] ?? []);
+$sellerProducts = (array) ($_SESSION['seller_products'] ?? []);
+
+$totalOrders = count($sellerOrders);
+$totalProducts = count($sellerProducts);
+
+$totalSales = 0.0;
+foreach ($sellerOrders as $order) {
+	if (!is_array($order)) {
+		continue;
+	}
+	$totalSales += (float) ($order['total'] ?? 0);
+}
+
+// Group orders by product for chart
+$productSales = [];
+foreach ($sellerOrders as $order) {
+	if (!is_array($order) || empty($order['product_name'])) {
+		continue;
+	}
+	$productName = $order['product_name'];
+	$orderTotal = (float) ($order['total'] ?? 0);
+	
+	if (!isset($productSales[$productName])) {
+		$productSales[$productName] = 0;
+	}
+	$productSales[$productName] += $orderTotal;
+}
+
+// Sort by sales descending
+arsort($productSales);
+
+// Prepare data for Chart.js
+$chartLabels = array_keys($productSales);
+$chartData = array_values($productSales);
 ?>
 <!DOCTYPE html>
 <html>
@@ -14,6 +46,7 @@ $totalProducts = 12;
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 	<link href="../Style.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="dashboard-page">
 	<nav class="navbar navbar-expand-md navbar-light fixed-top bh-navbar">
@@ -21,7 +54,9 @@ $totalProducts = 12;
 			<a class="navbar-brand bh-brand" href="../Buyer/Dashboard.php">Brewhub</a>
 
 			<div class="d-flex align-items-center gap-2 order-md-3 bh-nav-actions">
-			
+				<span class="navbar-text" style="color: #8B4513; font-weight: 500;">
+					<i class="bi bi-shop me-2"></i>Brewhub Beans Corner
+				</span>
 			</div>
 
 			<div class="collapse navbar-collapse justify-content-center order-md-2" id="navbarNav">
@@ -77,45 +112,88 @@ $totalProducts = 12;
 					</div>
 				</div>
 			</section>
+
+			<section id="best-sellers" class="mb-4">
+				<div class="seller-stat-card">
+					<h2 class="seller-stat-label mb-4" style="font-size: 1.25rem; font-weight: 600;">Best Selling Products</h2>
+					<?php if (empty($productSales)): ?>
+						<div class="text-center py-5" style="color: #8B4513; opacity: 0.7;">
+							<i class="bi bi-graph-up" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+							<p class="mb-0">No sales data yet. Start selling to see your best sellers!</p>
+						</div>
+					<?php else: ?>
+						<div style="position: relative; height: 400px;">
+							<canvas id="bestSellersChart"></canvas>
+						</div>
+					<?php endif; ?>
+				</div>
+			</section>
 		</div>
 	</main>
 
-	<footer class="bh-footer seller-footer py-5 px-4 px-lg-5 mt-5">
-		<div class="container-fluid bh-footer-container">
-			<div class="row g-4 g-lg-5">
-				<div class="col-12 col-md-3 text-center text-md-start">
-					<a class="bh-footer-brand" href="SellerDashboard.php">Brewhub</a>
-					<img src="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3 mx-auto mx-md-0">
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+		<div class="container-fluid bh-footer-bar-container">
+			<div class="bh-footer-bar-left">
+				<div class="bh-footer-bar-logo-box">
+					<img src="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-bar-logo">
 				</div>
-				<div class="col-12 col-md-9 text-center text-md-start">
-					<h4 class="bh-footer-heading mb-3 text-center text-md-start">Menu</h4>
-					<ul class="navbar-nav flex-column flex-sm-row flex-wrap justify-content-center justify-content-md-start align-items-center gap-2 gap-md-4 gap-lg-5 bh-nav-links seller-footer-links">
-						<li class="nav-item">
-							<a class="nav-link active" aria-current="page" href="SellerDashboard.php">Dashboard</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="Products.php">Products</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="Orders.php">Orders</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="ShopProfile.php">Shop Profile</a>
-						</li>
-					</ul>
+
+				<div class="bh-footer-bar-meta">
+					<div class="bh-footer-bar-copy">&copy; 2026 Brewhub Seller</div>
+					<div class="bh-footer-bar-legal" aria-label="Legal links">
+						<a class="bh-footer-bar-legal-link" href="#">Terms</a>
+						<a class="bh-footer-bar-legal-link" href="#">Privacy</a>
+						<a class="bh-footer-bar-legal-link" href="#">Cookies</a>
+					</div>
 				</div>
 			</div>
 
-			<div class="bh-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-5 pt-4">
-				<p class="bh-footer-copy mb-0">&copy; 2024 Brewhub Editorial. All rights reserved.</p>
-				<div class="d-flex gap-3 mt-3 mt-md-0">
-					<a class="bh-footer-social" href="#" aria-label="Share"><i class="bi bi-share"></i></a>
-					<a class="bh-footer-social" href="#" aria-label="Language"><i class="bi bi-globe2"></i></a>
-				</div>
-			</div>
+			<nav class="bh-footer-bar-nav" aria-label="Footer navigation">
+				<a class="bh-footer-bar-link" href="SellerDashboard.php">Dashboard</a>
+				<a class="bh-footer-bar-link" href="Products.php">Products</a>
+				<a class="bh-footer-bar-link" href="Orders.php">Orders</a>
+				<a class="bh-footer-bar-link" href="ShopProfile.php">Shop Profile</a>
+			</nav>
 		</div>
 	</footer>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<?php if (!empty($productSales)): ?>
+	<script>
+		const ctx = document.getElementById('bestSellersChart');
+		new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: <?php echo json_encode($chartLabels); ?>,
+				datasets: [{
+					label: 'Sales (PHP)',
+					data: <?php echo json_encode($chartData); ?>,
+					backgroundColor: 'rgba(139, 69, 19, 0.7)',
+					borderColor: 'rgba(139, 69, 19, 1)',
+					borderWidth: 1
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						display: false
+					}
+				},
+				scales: {
+					y: {
+						beginAtZero: true,
+						ticks: {
+							callback: function(value) {
+								return 'PHP ' + value.toLocaleString();
+							}
+						}
+					}
+				}
+			}
+		});
+	</script>
+	<?php endif; ?>
 </body>
 </html>

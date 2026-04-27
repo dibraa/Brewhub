@@ -2,89 +2,120 @@
 declare(strict_types=1);
 session_start();
 
-// Initialize demo seller requests in session if not exists
-if (!isset($_SESSION['demo_requests'])) {
-	$_SESSION['demo_requests'] = [
-		['id' => 1, 'username' => 'C. Garcia', 'email' => 'cgarcia@brewhub.com', 'shop_name' => 'BeanCraft Supplies', 'business_description' => 'Premium coffee beans supplier specializing in single-origin and specialty blends', 'status' => 'Pending', 'created_at' => '2024-04-18'],
-		['id' => 2, 'username' => 'S. Dela Cruz', 'email' => 'sdelacruz@brewhub.com', 'shop_name' => 'Cup & Co.', 'business_description' => 'High-quality coffee cups, mugs, and accessories for coffee enthusiasts', 'status' => 'Pending', 'created_at' => '2024-04-16'],
-		['id' => 3, 'username' => 'P. Navarro', 'email' => 'pnavarro@brewhub.com', 'shop_name' => 'GrindHouse Tools', 'business_description' => 'Professional coffee equipment and grinders for home and commercial use', 'status' => 'Pending', 'created_at' => '2024-04-14'],
-		['id' => 4, 'username' => 'L. Torres', 'email' => 'ltorres@brewhub.com', 'shop_name' => 'Brew Masters', 'business_description' => 'Artisanal coffee roasting and brewing equipment', 'status' => 'Approved', 'created_at' => '2024-04-10'],
-		['id' => 5, 'username' => 'R. Cruz', 'email' => 'rcruz@brewhub.com', 'shop_name' => 'Coffee Corner', 'business_description' => 'Local coffee shop supplies and ingredients', 'status' => 'Rejected', 'created_at' => '2024-04-08'],
-	];
+function bh_fetch_requests_from_session(): array
+{
+	$requestsRaw = $_SESSION['bh_seller_requests'] ?? [];
+	if (!is_array($requestsRaw)) {
+		return [];
+	}
+
+	$out = [];
+	foreach (array_values($requestsRaw) as $r) {
+		if (!is_array($r)) {
+			continue;
+		}
+		$id = (int) ($r['id'] ?? $r['request_id'] ?? 0);
+		if ($id <= 0) {
+			continue;
+		}
+		$out[] = [
+			'id' => $id,
+			'username' => (string) ($r['username'] ?? $r['name'] ?? ''),
+			'email' => (string) ($r['email'] ?? ''),
+			'shop_name' => (string) ($r['shop_name'] ?? $r['shop'] ?? ''),
+			'business_description' => (string) ($r['business_description'] ?? $r['shop_description'] ?? $r['description'] ?? ''),
+			'status' => (string) ($r['status'] ?? 'Pending'),
+			'created_at' => (string) ($r['created_at'] ?? ''),
+		];
+	}
+
+	return $out;
+}
+
+function bh_update_request_status_in_session(int $requestId, string $status): bool
+{
+	if ($requestId <= 0) {
+		return false;
+	}
+
+	$requests = $_SESSION['bh_seller_requests'] ?? [];
+	if (!is_array($requests)) {
+		$requests = [];
+	}
+
+	$updated = false;
+	$next = [];
+	foreach ($requests as $r) {
+		if (!is_array($r)) {
+			continue;
+		}
+		$id = (int) ($r['id'] ?? $r['request_id'] ?? 0);
+		if ($id === $requestId) {
+			$r['status'] = $status;
+			$updated = true;
+		}
+		$next[] = $r;
+	}
+
+	$_SESSION['bh_seller_requests'] = $next;
+	return $updated;
+}
+
+function bh_delete_request_from_session(int $requestId): bool
+{
+	if ($requestId <= 0) {
+		return false;
+	}
+
+	$requests = $_SESSION['bh_seller_requests'] ?? [];
+	if (!is_array($requests)) {
+		$requests = [];
+	}
+
+	$deleted = false;
+	$next = [];
+	foreach ($requests as $r) {
+		if (!is_array($r)) {
+			continue;
+		}
+		$id = (int) ($r['id'] ?? $r['request_id'] ?? 0);
+		if ($id === $requestId) {
+			$deleted = true;
+			continue;
+		}
+		$next[] = $r;
+	}
+
+	$_SESSION['bh_seller_requests'] = $next;
+	return $deleted;
 }
 
 $message = '';
 
-// Handle approve action
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'approve' && isset($_POST['request_id'])) {
-	$requestId = (int)$_POST['request_id'];
-	$requests = $_SESSION['demo_requests'];
-	$approved = false;
-	
-	foreach ($requests as &$request) {
-		if ($request['id'] === $requestId) {
-			$request['status'] = 'Approved';
-			$approved = true;
-			break;
-		}
-	}
-	unset($request);
-	
-	if ($approved) {
-		$_SESSION['demo_requests'] = $requests;
-		$message = '<div class="alert alert-success">Seller request approved successfully!</div>';
-	} else {
-		$message = '<div class="alert alert-danger">Request not found.</div>';
-	}
-}
-
-// Handle reject action
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reject' && isset($_POST['request_id'])) {
-	$requestId = (int)$_POST['request_id'];
-	$requests = $_SESSION['demo_requests'];
-	$rejected = false;
-	
-	foreach ($requests as &$request) {
-		if ($request['id'] === $requestId) {
-			$request['status'] = 'Rejected';
-			$rejected = true;
-			break;
-		}
-	}
-	unset($request);
-	
-	if ($rejected) {
-		$_SESSION['demo_requests'] = $requests;
-		$message = '<div class="alert alert-warning">Seller request rejected.</div>';
-	} else {
-		$message = '<div class="alert alert-danger">Request not found.</div>';
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+	$action = (string) ($_POST['action'] ?? '');
+	$requestId = (int) ($_POST['request_id'] ?? 0);
+	if ($requestId <= 0) {
+		$message = '<div class="alert alert-danger">Invalid request id.</div>';
+	} elseif ($action === 'approve') {
+		$ok = bh_update_request_status_in_session($requestId, 'Approved');
+		$message = $ok
+			? '<div class="alert alert-success">Seller request approved successfully!</div>'
+			: '<div class="alert alert-danger">Request not found.</div>';
+	} elseif ($action === 'reject') {
+		$ok = bh_update_request_status_in_session($requestId, 'Rejected');
+		$message = $ok
+			? '<div class="alert alert-warning">Seller request rejected.</div>'
+			: '<div class="alert alert-danger">Request not found.</div>';
+	} elseif ($action === 'delete') {
+		$ok = bh_delete_request_from_session($requestId);
+		$message = $ok
+			? '<div class="alert alert-success">Request deleted successfully!</div>'
+			: '<div class="alert alert-danger">Request not found.</div>';
 	}
 }
 
-// Handle delete action
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['request_id'])) {
-	$requestId = (int)$_POST['request_id'];
-	$requests = $_SESSION['demo_requests'];
-	$newRequests = [];
-	$deleted = false;
-	
-	foreach ($requests as $request) {
-		if ($request['id'] !== $requestId) {
-			$newRequests[] = $request;
-		} else {
-			$deleted = true;
-		}
-	}
-	
-	if ($deleted) {
-		$_SESSION['demo_requests'] = $newRequests;
-		$message = '<div class="alert alert-success">Request deleted successfully!</div>';
-	} else {
-		$message = '<div class="alert alert-danger">Request not found.</div>';
-	}
-}
-
-$requests = $_SESSION['demo_requests'];
+$requests = bh_fetch_requests_from_session();
 ?>
 
 <!DOCTYPE html>
@@ -98,7 +129,7 @@ $requests = $_SESSION['demo_requests'];
 	<link href="../Style.css?v=20260420" rel="stylesheet">
 </head>
 
-<body class="admin-page admin-sidebar-layout">
+<body class="admin-page admin-sidebar-layout d-flex flex-column min-vh-100">
 	<nav class="admin-topbar">
 		<div class="admin-topbar-container">
 			<button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
@@ -154,7 +185,7 @@ $requests = $_SESSION['demo_requests'];
 					<div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
 						<div>
 							<h2 class="admin-dashboard-title mb-1">Seller Requests</h2>
-							<p class="admin-dashboard-subtitle mb-0">Review and approve seller applications <span class="admin-pill">Demo Data</span></p>
+							<p class="admin-dashboard-subtitle mb-0">Review and approve seller applications</p>
 						</div>
 						<div class="d-flex gap-2">
 							<div class="dropdown">
@@ -207,7 +238,7 @@ $requests = $_SESSION['demo_requests'];
 											<td class="text-muted" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 												<?php echo htmlspecialchars($request['business_description']); ?>
 											</td>
-											<td class="text-muted"><?php echo date('M d, Y', strtotime($request['created_at'])); ?></td>
+												<td class="text-muted"><?php echo ($request['created_at'] ?? '') !== '' ? date('M d, Y', strtotime($request['created_at'])) : '-'; ?></td>
 											<td>
 												<span class="admin-status <?php echo strtolower($request['status']) === 'pending' ? 'admin-status-muted' : ''; ?>">
 													<?php echo htmlspecialchars($request['status']); ?>
@@ -253,7 +284,7 @@ $requests = $_SESSION['demo_requests'];
 		</section>
 	</main>
 
-	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-auto">
 		<div class="container-fluid bh-footer-bar-container">
 			<div class="bh-footer-bar-left">
 				<div class="bh-footer-bar-logo-box">

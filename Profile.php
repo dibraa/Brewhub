@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 session_start();
 
-// Initialize demo profile data in session if not exists
-if (!isset($_SESSION['user_profile'])) {
-	$_SESSION['user_profile'] = [
-		'username' => 'brewlover_07',
-		'fullname' => 'Dave Nathaniel Pequero',
-		'email' => 'Dib.peq@brewhub.com'
-	];
+$loggedIn = (bool) ($_SESSION['loggedin'] ?? false);
+$userId = (int) ($_SESSION['ID'] ?? 0);
+
+if (!$loggedIn || $userId <= 0) {
+	header('Location: Login.php');
+	exit;
 }
 
 if (!isset($_SESSION['bh_cart']) || !is_array($_SESSION['bh_cart'])) {
@@ -22,6 +21,12 @@ $toastMessage = '';
 $toastType = 'success';
 $isEditMode = false;
 
+$profile = [
+	'username' => (string) ($_SESSION['username'] ?? ''),
+	'fullname' => (string) ($_SESSION['fullname'] ?? ''),
+	'email' => (string) ($_SESSION['email'] ?? ''),
+];
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 	if ($_POST['action'] === 'edit') {
@@ -32,11 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 		$email = trim($_POST['email'] ?? '');
 		
 		if (!empty($username) && !empty($fullname) && !empty($email)) {
-			$_SESSION['user_profile'] = [
+			$_SESSION['username'] = $username;
+			$_SESSION['fullname'] = $fullname;
+			$_SESSION['email'] = $email;
+			$profile = [
 				'username' => $username,
 				'fullname' => $fullname,
-				'email' => $email
+				'email' => $email,
 			];
+
 			$showToast = true;
 			$toastMessage = 'Profile updated successfully!';
 			$toastType = 'success';
@@ -50,8 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 		$isEditMode = false;
 	}
 }
-
-$profile = $_SESSION['user_profile'];
 $cartCount = array_sum(array_map('intval', (array) $_SESSION['bh_cart']));
 ?>
 
@@ -116,9 +123,7 @@ $cartCount = array_sum(array_map('intval', (array) $_SESSION['bh_cart']));
 									<p class="profile-kicker mb-2"><i class="bi bi-cup-hot me-2"></i>Brewhub Account</p>
 									<h1 class="profile-title h3 mb-0">My Profile</h1>
 								</div>
-								<?php if (!$isEditMode): ?>
-								<span class="admin-pill">Demo Data</span>
-								<?php endif; ?>
+
 							</div>
 
 							<?php if ($isEditMode): ?>

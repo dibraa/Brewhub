@@ -3,154 +3,51 @@ declare(strict_types=1);
 
 session_start();
 
-function bh_env(string $key, string $default): string
+function bh_products_by_id_from_session(): array
 {
-  $value = getenv($key);
-  if ($value === false || $value === '') {
-    return $default;
-  }
-  return $value;
-}
+	$byId = [];
 
-function bh_db_connect(): ?mysqli
-{
-  mysqli_report(MYSQLI_REPORT_OFF);
+	$cache = $_SESSION['bh_product_cache'] ?? [];
+	if (is_array($cache)) {
+		foreach ($cache as $id => $p) {
+			if (!is_array($p)) {
+				continue;
+			}
+			$productId = (int) ($p['id'] ?? $id);
+			if ($productId <= 0) {
+				continue;
+			}
+			$byId[$productId] = [
+				'id' => $productId,
+				'name' => (string) ($p['name'] ?? ''),
+				'category' => (string) ($p['category'] ?? ''),
+				'price' => (float) ($p['price'] ?? 0),
+				'image' => (string) ($p['image'] ?? ''),
+			];
+		}
+	}
 
-  $host = bh_env('BREWHUB_DB_HOST', '127.0.0.1');
-  $user = bh_env('BREWHUB_DB_USER', 'root');
-  $pass = bh_env('BREWHUB_DB_PASS', '');
-  $name = bh_env('BREWHUB_DB_NAME', 'brewhub');
-  $port = (int) bh_env('BREWHUB_DB_PORT', '3306');
+	$products = $_SESSION['bh_products'] ?? [];
+	if (is_array($products)) {
+		foreach ($products as $p) {
+			if (!is_array($p)) {
+				continue;
+			}
+			$productId = (int) ($p['id'] ?? 0);
+			if ($productId <= 0 || isset($byId[$productId])) {
+				continue;
+			}
+			$byId[$productId] = [
+				'id' => $productId,
+				'name' => (string) ($p['name'] ?? ''),
+				'category' => (string) ($p['category'] ?? ''),
+				'price' => (float) ($p['price'] ?? 0),
+				'image' => (string) ($p['image'] ?? ''),
+			];
+		}
+	}
 
-  $db = @new mysqli($host, $user, $pass, $name, $port);
-  if ($db && !$db->connect_errno) {
-    @$db->set_charset('utf8mb4');
-    return $db;
-  }
-
-  return null;
-}
-
-function bh_demo_products(): array
-{
-  return [
-    [
-      'id' => 101,
-      'name' => 'Arabica Beans (1kg)',
-      'category' => 'Coffee & Ingredients',
-      'price' => 549.00,
-      'image' => '../Assets/Arabica.png',
-    ],
-    [
-      'id' => 102,
-      'name' => 'Robusta Beans (1kg)',
-      'category' => 'Coffee & Ingredients',
-      'price' => 499.00,
-      'image' => '../Assets/Robusta.png',
-    ],
-    [
-      'id' => 106,
-      'name' => 'Barako Beans (1kg)',
-      'category' => 'Coffee & Ingredients',
-      'price' => 529.00,
-      'image' => '../Assets/Barako.png',
-    ],
-    [
-      'id' => 115,
-      'name' => 'Arabica + Robusta Blend (1kg)',
-      'category' => 'Coffee & Ingredients',
-      'price' => 519.00,
-      'image' => '../Assets/Arabica + robusta.png',
-    ],
-    [
-      'id' => 103,
-      'name' => 'Coffee Cups Pack',
-      'category' => 'Cups & Packaging',
-      'price' => 129.00,
-      'image' => '../Assets/Cups.png',
-    ],
-    [
-      'id' => 107,
-      'name' => 'Cup Lids & Sleeves Bundle',
-      'category' => 'Cups & Packaging',
-      'price' => 159.00,
-      'image' => '../Assets/Suplies.png',
-    ],
-    [
-      'id' => 104,
-      'name' => 'Brewing Equipment Set',
-      'category' => 'Equipments',
-      'price' => 1499.00,
-      'image' => '../Assets/Equipment.png',
-    ],
-    [
-      'id' => 109,
-      'name' => 'Coffee Grinder Pro',
-      'category' => 'Equipments',
-      'price' => 1899.00,
-      'image' => '../Assets/Equipment.png',
-    ],
-    [
-      'id' => 105,
-      'name' => 'Pastry Box Bundle',
-      'category' => 'Pastry',
-      'price' => 219.00,
-      'image' => '../Assets/pastries.png',
-    ],
-    [
-      'id' => 110,
-      'name' => 'Croissant Pack',
-      'category' => 'Pastry',
-      'price' => 189.00,
-      'image' => '../Assets/pastries.png',
-    ],
-  ];
-}
-
-function bh_fetch_products_from_db(): ?array
-{
-  $db = bh_db_connect();
-  if (!$db) {
-    return null;
-  }
-
-  $tablesToTry = ['products', 'product', 'items'];
-  $rows = null;
-
-  foreach ($tablesToTry as $table) {
-    $sqls = [
-      "SELECT id, name, price, image, category FROM `{$table}` LIMIT 100",
-      "SELECT product_id AS id, product_name AS name, price, image AS image, category AS category FROM `{$table}` LIMIT 100",
-      "SELECT id, title AS name, price, image_url AS image, category AS category FROM `{$table}` LIMIT 100",
-    ];
-
-    foreach ($sqls as $sql) {
-      $result = @$db->query($sql);
-      if (!$result) {
-        continue;
-      }
-
-      $tmp = [];
-      while ($r = $result->fetch_assoc()) {
-        $tmp[] = [
-          'id' => (int) ($r['id'] ?? 0),
-          'name' => (string) ($r['name'] ?? ''),
-          'category' => (string) ($r['category'] ?? ''),
-          'price' => (float) ($r['price'] ?? 0),
-          'image' => (string) ($r['image'] ?? '../Assets/Carousel.png'),
-        ];
-      }
-      $result->free();
-
-      if (count($tmp) > 0) {
-        $rows = $tmp;
-        break 2;
-      }
-    }
-  }
-
-  @$db->close();
-  return $rows;
+	return $byId;
 }
 
 function bh_normalize_buyer_image(string $image): string
@@ -205,11 +102,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   }
 }
 
-$allProducts = bh_fetch_products_from_db() ?? bh_demo_products();
-$productsById = [];
-foreach ($allProducts as $p) {
-  $productsById[(int) ($p['id'] ?? 0)] = $p;
-}
+$productsById = bh_products_by_id_from_session();
 
 $cartItems = [];
 $subtotal = 0;

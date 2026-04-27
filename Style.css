@@ -40,7 +40,7 @@ body.auth-page::after {
 	background: var(--panel-bg);
 	border-radius: 10px;
 	overflow: hidden;
-	box-shadow: var(--shadow);
+	box-shadow: 0 20px 90px rgba(34, 34, 34, 0.25);
 	animation: card-in 550ms ease both;
 }
 
@@ -1002,6 +1002,13 @@ body.admin-sidebar-collapsed .admin-sidebar {
 	position: relative;
 	overflow: hidden;
 	isolation: isolate;
+	box-shadow: 0 8px 24px rgba(57, 35, 23, 0.15);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.category-tile:hover {
+	transform: scale(1.05);
+	box-shadow: 0 16px 40px rgba(57, 35, 23, 0.28);
 }
 
 .category-title {
@@ -2594,6 +2601,33 @@ body.admin-sidebar-collapsed .admin-sidebar {
 
 	.dashboard-hero-content {
 		padding: 1.8rem 0 2.8rem;
+	}
+}
+
+/* Section Divider Title */
+.section-divider-title {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	font-weight: 700;
+	color: #3f291f;
+	text-align: center;
+	white-space: nowrap;
+	padding: 0 2rem;
+}
+
+.section-divider-title::before,
+.section-divider-title::after {
+	content: "";
+	flex: 1;
+	height: 1.5px;
+	background: #1a1a1a;
+	border-radius: 999px;
+}
+
+@media (max-width: 767.98px) {
+	.section-divider-title {
+		padding: 0 1rem;
 	}
 }
 

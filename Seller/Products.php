@@ -1,36 +1,6 @@
 <?php
 session_start();
 
-// Temporary demo data for seller products page.
-// Replace these with database values once backend is ready.
-
-$defaultProducts = [
-	[
-		'id' => 'arabica-beans',
-		'name' => 'Arabica Beans',
-		'description' => 'Smooth, aromatic beans with a naturally sweet finish.',
-		'price' => 960.00,
-		'stock' => 24,
-		'image' => '../Assets/Arabica.png',
-	],
-	[
-		'id' => 'robusta-beans',
-		'name' => 'Robusta Beans',
-		'description' => 'Bold and strong roast for espresso blends and iced drinks.',
-		'price' => 299.00,
-		'stock' => 40,
-		'image' => '../Assets/Robusta.png',
-	],
-	[
-		'id' => 'barako-beans',
-		'name' => 'Barako Beans',
-		'description' => 'Local favorite with a rich aroma and intense flavor.',
-		'price' => 295.00,
-		'stock' => 31,
-		'image' => '../Assets/Barako.png',
-	],
-];
-
 function generateProductId(): string
 {
 	if (function_exists('random_bytes')) {
@@ -71,7 +41,7 @@ function tryDeleteUploadedImage(string $imagePath): void
 }
 
 if (!isset($_SESSION['seller_products']) || !is_array($_SESSION['seller_products'])) {
-	$_SESSION['seller_products'] = $defaultProducts;
+	$_SESSION['seller_products'] = [];
 }
 
 // Backward-compat: ensure all products have an id field.
@@ -226,13 +196,15 @@ $products = $_SESSION['seller_products'];
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 	<link href="../Style.css" rel="stylesheet">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page d-flex flex-column min-vh-100">
 	<nav class="navbar navbar-expand-md navbar-light fixed-top bh-navbar">
 		<div class="container-fluid px-4 px-lg-5 bh-nav-container">
 			<a class="navbar-brand bh-brand" href="../Buyer/Dashboard.php">Brewhub</a>
 
 			<div class="d-flex align-items-center gap-2 order-md-3 bh-nav-actions">
-			
+				<span class="navbar-text" style="color: #8B4513; font-weight: 500;">
+					<i class="bi bi-shop me-2"></i>Brewhub Beans Corner
+				</span>
 			</div>
 
 			<div class="collapse navbar-collapse justify-content-center order-md-2" id="navbarNav">
@@ -359,39 +331,29 @@ $products = $_SESSION['seller_products'];
 		</div>
 	</main>
 
-	<footer class="bh-footer seller-footer py-5 px-4 px-lg-5 mt-5">
-		<div class="container-fluid bh-footer-container">
-			<div class="row g-4 g-lg-5">
-				<div class="col-12 col-md-3 text-center text-md-start">
-					<a class="bh-footer-brand" href="SellerDashboard.php">Brewhub</a>
-					<img src="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-logo mt-3 mx-auto mx-md-0">
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-auto">
+		<div class="container-fluid bh-footer-bar-container">
+			<div class="bh-footer-bar-left">
+				<div class="bh-footer-bar-logo-box">
+					<img src="../Assets/Brew_Hub.png" alt="Brewhub Logo" class="bh-footer-bar-logo">
 				</div>
-				<div class="col-12 col-md-9 text-center text-md-start">
-					<h4 class="bh-footer-heading mb-3 text-center text-md-start">Menu</h4>
-					<ul class="navbar-nav flex-column flex-sm-row flex-wrap justify-content-center justify-content-md-start align-items-center gap-2 gap-md-4 gap-lg-5 bh-nav-links seller-footer-links">
-						<li class="nav-item">
-							<a class="nav-link" href="SellerDashboard.php">Dashboard</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link active" aria-current="page" href="Products.php">Products</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="Orders.php">Orders</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="ShopProfile.php">Shop Profile</a>
-						</li>
-					</ul>
+
+				<div class="bh-footer-bar-meta">
+					<div class="bh-footer-bar-copy">&copy; 2026 Brewhub Seller</div>
+					<div class="bh-footer-bar-legal" aria-label="Legal links">
+						<a class="bh-footer-bar-legal-link" href="#">Terms</a>
+						<a class="bh-footer-bar-legal-link" href="#">Privacy</a>
+						<a class="bh-footer-bar-legal-link" href="#">Cookies</a>
+					</div>
 				</div>
 			</div>
 
-			<div class="bh-footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-5 pt-4">
-				<p class="bh-footer-copy mb-0">&copy; 2024 Brewhub Editorial. All rights reserved.</p>
-				<div class="d-flex gap-3 mt-3 mt-md-0">
-					<a class="bh-footer-social" href="#" aria-label="Share"><i class="bi bi-share"></i></a>
-					<a class="bh-footer-social" href="#" aria-label="Language"><i class="bi bi-globe2"></i></a>
-				</div>
-			</div>
+			<nav class="bh-footer-bar-nav" aria-label="Footer navigation">
+				<a class="bh-footer-bar-link" href="SellerDashboard.php">Dashboard</a>
+				<a class="bh-footer-bar-link" href="Products.php">Products</a>
+				<a class="bh-footer-bar-link" href="Orders.php">Orders</a>
+				<a class="bh-footer-bar-link" href="ShopProfile.php">Shop Profile</a>
+			</nav>
 		</div>
 	</footer>
 

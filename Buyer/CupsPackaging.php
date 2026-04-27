@@ -3,154 +3,60 @@ declare(strict_types=1);
 
 session_start();
 
-function bh_env(string $key, string $default): string
+function bh_fetch_products_from_session(): array
 {
-  $value = getenv($key);
-  if ($value === false || $value === '') {
-    return $default;
-  }
-  return $value;
-}
-
-function bh_db_connect(): ?mysqli
-{
-  mysqli_report(MYSQLI_REPORT_OFF);
-
-  $host = bh_env('BREWHUB_DB_HOST', '127.0.0.1');
-  $user = bh_env('BREWHUB_DB_USER', 'root');
-  $pass = bh_env('BREWHUB_DB_PASS', '');
-  $name = bh_env('BREWHUB_DB_NAME', 'brewhub');
-  $port = (int) bh_env('BREWHUB_DB_PORT', '3306');
-
-  $db = @new mysqli($host, $user, $pass, $name, $port);
-  if ($db && !$db->connect_errno) {
-    @$db->set_charset('utf8mb4');
-    return $db;
+  $products = $_SESSION['bh_products'] ?? [];
+  if (!is_array($products)) {
+    return [];
   }
 
-  return null;
-}
-
-function bh_demo_products(): array
-{
-  return [
-    [
-      'id' => 101,
-      'name' => 'Arabica Beans (1kg)',
-      'category' => 'Coffee & Ingredients',
-      'price' => 549.00,
-      'image' => '../Assets/Arabica.png',
-    ],
-    [
-      'id' => 102,
-      'name' => 'Robusta Beans (1kg)',
-      'category' => 'Coffee & Ingredients',
-      'price' => 499.00,
-      'image' => '../Assets/Robusta.png',
-    ],
-    [
-      'id' => 106,
-      'name' => 'Barako Beans (1kg)',
-      'category' => 'Coffee & Ingredients',
-      'price' => 529.00,
-      'image' => '../Assets/Barako.png',
-    ],
-    [
-      'id' => 103,
-      'name' => 'Coffee Cups Pack',
-      'category' => 'Cups & Packaging',
-      'price' => 129.00,
-      'image' => '../Assets/Cups.png',
-    ],
-    [
-      'id' => 107,
-      'name' => 'Cup Lids & Sleeves Bundle',
-      'category' => 'Cups & Packaging',
-      'price' => 159.00,
-      'image' => '../Assets/Suplies.png',
-    ],
-    [
-      'id' => 108,
-      'name' => 'Takeaway Bags (Pack)',
-      'category' => 'Cups & Packaging',
-      'price' => 99.00,
-      'image' => '../Assets/Suplies.png',
-    ],
-    [
-      'id' => 104,
-      'name' => 'Brewing Equipment Set',
-      'category' => 'Equipments',
-      'price' => 1499.00,
-      'image' => '../Assets/Equipment.png',
-    ],
-    [
-      'id' => 109,
-      'name' => 'Coffee Grinder Pro',
-      'category' => 'Equipments',
-      'price' => 1899.00,
-      'image' => '../Assets/Equipment.png',
-    ],
-    [
-      'id' => 105,
-      'name' => 'Pastry Box Bundle',
-      'category' => 'Pastry',
-      'price' => 219.00,
-      'image' => '../Assets/pastries.png',
-    ],
-    [
-      'id' => 110,
-      'name' => 'Croissant Pack',
-      'category' => 'Pastry',
-      'price' => 189.00,
-      'image' => '../Assets/pastries.png',
-    ],
-  ];
-}
-
-function bh_fetch_products_from_db(): ?array
-{
-  $db = bh_db_connect();
-  if (!$db) {
-    return null;
-  }
-
-  $tablesToTry = ['products', 'product', 'items'];
-  $rows = null;
-
-  foreach ($tablesToTry as $table) {
-    $sqls = [
-      "SELECT id, name, price, image, category FROM `{$table}` LIMIT 60",
-      "SELECT product_id AS id, product_name AS name, price, image AS image, category AS category FROM `{$table}` LIMIT 60",
-      "SELECT id, title AS name, price, image_url AS image, category AS category FROM `{$table}` LIMIT 60",
-    ];
-
-    foreach ($sqls as $sql) {
-      $result = @$db->query($sql);
-      if (!$result) {
-        continue;
-      }
-
-      $tmp = [];
-      while ($r = $result->fetch_assoc()) {
-        $tmp[] = [
-          'id' => (int) ($r['id'] ?? 0),
-          'name' => (string) ($r['name'] ?? ''),
-          'category' => (string) ($r['category'] ?? ''),
-          'price' => (float) ($r['price'] ?? 0),
-          'image' => (string) ($r['image'] ?? '../Assets/Carousel.png'),
-        ];
-      }
-      $result->free();
-
-      if (count($tmp) > 0) {
-        $rows = $tmp;
-        break 2;
-      }
+  $out = [];
+  foreach ($products as $p) {
+    if (!is_array($p)) {
+      continue;
     }
+    $id = (int) ($p['id'] ?? 0);
+    if ($id <= 0) {
+      continue;
+    }
+    $out[] = [
+      'id' => $id,
+      'name' => (string) ($p['name'] ?? ''),
+      'category' => (string) ($p['category'] ?? ''),
+      'price' => (float) ($p['price'] ?? 0),
+      'image' => (string) ($p['image'] ?? ''),
+    ];
   }
 
-  @$db->close();
-  return $rows;
+  return $out;
+}
+
+function bh_cache_product_from_post(int $productId): void
+{
+  if ($productId <= 0) {
+    return;
+  }
+
+  $name = trim((string) ($_POST['product_name'] ?? ''));
+  $category = trim((string) ($_POST['product_category'] ?? ''));
+  $image = trim((string) ($_POST['product_image'] ?? ''));
+  $price = (float) ($_POST['product_price'] ?? 0);
+
+  if ($name === '' && $price <= 0 && $category === '' && $image === '') {
+    return;
+  }
+
+  if (!isset($_SESSION['bh_product_cache']) || !is_array($_SESSION['bh_product_cache'])) {
+    $_SESSION['bh_product_cache'] = [];
+  }
+
+  $_SESSION['bh_product_cache'][$productId] = [
+    'id' => $productId,
+    'name' => $name,
+    'category' => $category,
+    'price' => $price,
+    'image' => $image,
+  ];
 }
 
 if (!isset($_SESSION['bh_cart']) || !is_array($_SESSION['bh_cart'])) {
@@ -164,19 +70,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   $productId = (int) ($_POST['product_id'] ?? 0);
 
   if ($productId > 0 && ($action === 'add_to_cart' || $action === 'buy_now')) {
+    bh_cache_product_from_post($productId);
     $cart = (array) $_SESSION['bh_cart'];
     $cart[$productId] = (int) ($cart[$productId] ?? 0) + 1;
     $_SESSION['bh_cart'] = $cart;
 
     $flash = ($action === 'buy_now')
-      ? 'Added to cart (demo). Buy Now flow coming soon.'
-      : 'Added to cart (demo).';
+      ? 'Added to cart. Buy Now flow coming soon.'
+      : 'Added to cart.';
   }
 }
 
 $cartCount = array_sum(array_map('intval', (array) $_SESSION['bh_cart']));
 
-$allProducts = bh_fetch_products_from_db() ?? bh_demo_products();
+$allProducts = bh_fetch_products_from_session();
 
 $products = array_values(array_filter($allProducts, function ($p): bool {
   $category = strtolower((string) ($p['category'] ?? ''));
@@ -308,11 +215,19 @@ $products = array_values(array_filter($allProducts, function ($p): bool {
                   <form method="post" class="m-0">
                     <input type="hidden" name="action" value="add_to_cart">
                     <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+                    <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input type="hidden" name="product_category" value="<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input type="hidden" name="product_price" value="<?php echo htmlspecialchars((string) $price, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($image, ENT_QUOTES, 'UTF-8'); ?>">
                     <button type="submit" class="btn bh-btn bh-btn-primary btn-sm"><i class="bi bi-bag-plus me-1"></i>Add to cart</button>
                   </form>
                   <form method="post" class="m-0">
                     <input type="hidden" name="action" value="buy_now">
                     <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+                    <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input type="hidden" name="product_category" value="<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input type="hidden" name="product_price" value="<?php echo htmlspecialchars((string) $price, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($image, ENT_QUOTES, 'UTF-8'); ?>">
                     <button type="submit" class="btn bh-btn bh-btn-ghost btn-sm"><i class="bi bi-lightning-charge me-1"></i>Buy now</button>
                   </form>
                 </div>
@@ -354,11 +269,19 @@ $products = array_values(array_filter($allProducts, function ($p): bool {
             <form method="post" class="m-0">
               <input type="hidden" name="action" value="add_to_cart">
               <input type="hidden" name="product_id" id="bhPreviewAddProductId" value="">
+              <input type="hidden" name="product_name" id="bhPreviewAddProductName" value="">
+              <input type="hidden" name="product_category" id="bhPreviewAddProductCategory" value="">
+              <input type="hidden" name="product_price" id="bhPreviewAddProductPrice" value="">
+              <input type="hidden" name="product_image" id="bhPreviewAddProductImage" value="">
               <button type="submit" class="btn bh-btn bh-btn-primary btn-sm"><i class="bi bi-bag-plus me-1"></i>Add to cart</button>
             </form>
             <form method="post" class="m-0">
               <input type="hidden" name="action" value="buy_now">
               <input type="hidden" name="product_id" id="bhPreviewBuyProductId" value="">
+              <input type="hidden" name="product_name" id="bhPreviewBuyProductName" value="">
+              <input type="hidden" name="product_category" id="bhPreviewBuyProductCategory" value="">
+              <input type="hidden" name="product_price" id="bhPreviewBuyProductPrice" value="">
+              <input type="hidden" name="product_image" id="bhPreviewBuyProductImage" value="">
               <button type="submit" class="btn bh-btn bh-btn-ghost btn-sm"><i class="bi bi-lightning-charge me-1"></i>Buy now</button>
             </form>
           </div>

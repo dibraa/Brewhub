@@ -2,44 +2,107 @@
 declare(strict_types=1);
 session_start();
 
-// Initialize demo users in session if not exists
-if (!isset($_SESSION['demo_users'])) {
-	$_SESSION['demo_users'] = [
-		['id' => 1, 'username' => 'Admin User', 'email' => 'admin@brewhub.com', 'role' => 'Admin', 'status' => 'Active', 'created_at' => '2024-01-01'],
-		['id' => 2, 'username' => 'A. Santos', 'email' => 'asantos@brewhub.com', 'role' => 'Buyer', 'status' => 'Active', 'created_at' => '2024-01-15'],
-		['id' => 3, 'username' => 'M. Reyes', 'email' => 'mreyes@brewhub.com', 'role' => 'Seller', 'status' => 'Pending', 'created_at' => '2024-02-20'],
-		['id' => 4, 'username' => 'J. Lim', 'email' => 'jlim@brewhub.com', 'role' => 'Admin', 'status' => 'Active', 'created_at' => '2024-01-10'],
-		['id' => 5, 'username' => 'C. Garcia', 'email' => 'cgarcia@brewhub.com', 'role' => 'Buyer', 'status' => 'Active', 'created_at' => '2024-03-05'],
-		['id' => 6, 'username' => 'S. Dela Cruz', 'email' => 'sdelacruz@brewhub.com', 'role' => 'Buyer', 'status' => 'Active', 'created_at' => '2024-03-12'],
-	];
+// Database connection
+function bh_get_pdo(): ?PDO
+{
+	try {
+		$pdo = new PDO(
+			'mysql:host=localhost;dbname=brewhub;charset=utf8mb4',
+			'root',
+			'',
+			[
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+				PDO::ATTR_EMULATE_PREPARES => false,
+			]
+		);
+		return $pdo;
+	} catch (PDOException $e) {
+		return null;
+	}
+}
+
+function bh_fetch_users_from_db(): array
+{
+	$pdo = bh_get_pdo();
+	if (!$pdo) {
+		return [];
+	}
+
+	try {
+		$stmt = $pdo->query("SELECT id, username, name, email, role, 'Active' as status, NOW() as created_at FROM users ORDER BY id DESC");
+		return $stmt->fetchAll();
+	} catch (PDOException $e) {
+		return [];
+	}
+}
+
+function bh_delete_user_from_db(int $userId): bool
+{
+	$pdo = bh_get_pdo();
+	if (!$pdo || $userId <= 0) {
+		return false;
+	}
+
+	try {
+		$stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+		return $stmt->execute([$userId]);
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+function bh_add_admin_to_db(string $username, string $name, string $email, string $password): bool
+{
+	$pdo = bh_get_pdo();
+	if (!$pdo) {
+		return false;
+	}
+
+	try {
+		$hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+		$stmt = $pdo->prepare("INSERT INTO users (username, name, email, password, role) VALUES (?, ?, ?, ?, 'admin')");
+		return $stmt->execute([$username, $name, $email, $hashedPassword]);
+	} catch (PDOException $e) {
+		return false;
+	}
 }
 
 $message = '';
 
-// Handle user deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['user_id'])) {
-	$userId = (int)$_POST['user_id'];
-	$users = $_SESSION['demo_users'];
-	$newUsers = [];
-	$deleted = false;
-	
-	foreach ($users as $user) {
-		if ($user['id'] !== $userId) {
-			$newUsers[] = $user;
-		} else {
-			$deleted = true;
-		}
-	}
-	
-	if ($deleted) {
-		$_SESSION['demo_users'] = $newUsers;
-		$message = '<div class="alert alert-success">User deleted successfully!</div>';
+// Handle add admin action
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && (string) ($_POST['action'] ?? '') === 'add_admin') {
+	$username = trim($_POST['username'] ?? '');
+	$name = trim($_POST['name'] ?? '');
+	$email = trim($_POST['email'] ?? '');
+	$password = trim($_POST['password'] ?? '');
+
+	if (empty($username) || empty($name) || empty($email) || empty($password)) {
+		$message = '<div class="alert alert-danger">All fields are required.</div>';
+	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		$message = '<div class="alert alert-danger">Invalid email address.</div>';
 	} else {
-		$message = '<div class="alert alert-danger">User not found.</div>';
+		$added = bh_add_admin_to_db($username, $name, $email, $password);
+		$message = $added
+			? '<div class="alert alert-success">Admin account created successfully!</div>'
+			: '<div class="alert alert-danger">Failed to create admin account. Email or username may already exist.</div>';
 	}
 }
 
-$users = $_SESSION['demo_users'];
+// Handle delete user action
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && (string) ($_POST['action'] ?? '') === 'delete') {
+	$userId = (int) ($_POST['user_id'] ?? 0);
+	if ($userId <= 0) {
+		$message = '<div class="alert alert-danger">Invalid user id.</div>';
+	} else {
+		$deleted = bh_delete_user_from_db($userId);
+		$message = $deleted
+			? '<div class="alert alert-success">User deleted successfully!</div>'
+			: '<div class="alert alert-danger">User not found.</div>';
+	}
+}
+
+$users = bh_fetch_users_from_db();
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +116,7 @@ $users = $_SESSION['demo_users'];
 	<link href="../Style.css?v=20260420" rel="stylesheet">
 </head>
 
-<body class="admin-page admin-sidebar-layout">
+<body class="admin-page admin-sidebar-layout d-flex flex-column min-vh-100">
 	<nav class="admin-topbar">
 		<div class="admin-topbar-container">
 			<button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
@@ -109,9 +172,12 @@ $users = $_SESSION['demo_users'];
 					<div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
 						<div>
 							<h2 class="admin-dashboard-title mb-1">User Management</h2>
-							<p class="admin-dashboard-subtitle mb-0">Manage all users in the system <span class="admin-pill">Demo Data</span></p>
+							<p class="admin-dashboard-subtitle mb-0">Manage all users in the system</p>
 						</div>
 						<div class="d-flex gap-2">
+							<button type="button" class="btn admin-btn admin-btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+								<i class="bi bi-person-plus me-1"></i>Add Admin
+							</button>
 							<input type="text" class="form-control" id="searchUsers" placeholder="Search users..." style="max-width: 250px;">
 						</div>
 					</div>
@@ -134,6 +200,7 @@ $users = $_SESSION['demo_users'];
 										<tr>
 											<th>ID</th>
 											<th>Username</th>
+											<th>Name</th>
 											<th>Email</th>
 											<th>Role</th>
 											<th>Status</th>
@@ -146,6 +213,7 @@ $users = $_SESSION['demo_users'];
 										<tr>
 											<td class="fw-semibold">#<?php echo htmlspecialchars((string)$user['id']); ?></td>
 											<td class="fw-semibold"><?php echo htmlspecialchars($user['username']); ?></td>
+											<td class="fw-semibold"><?php echo htmlspecialchars($user['name'] ?? ''); ?></td>
 											<td class="text-muted"><?php echo htmlspecialchars($user['email']); ?></td>
 											<td><span class="admin-badge"><?php echo htmlspecialchars($user['role']); ?></span></td>
 											<td>
@@ -153,7 +221,7 @@ $users = $_SESSION['demo_users'];
 													<?php echo htmlspecialchars($user['status']); ?>
 												</span>
 											</td>
-											<td class="text-muted"><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
+											<td class="text-muted"><?php echo ($user['created_at'] ?? '') !== '' ? date('M d, Y', strtotime($user['created_at'])) : '-'; ?></td>
 											<td class="text-end">
 												<button type="button" class="btn admin-btn admin-btn-ghost btn-sm" onclick="viewUser(<?php echo $user['id']; ?>)">
 													<i class="bi bi-eye me-1"></i>View
@@ -178,7 +246,61 @@ $users = $_SESSION['demo_users'];
 		</section>
 	</main>
 
-	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+	<!-- Add Admin Modal -->
+	<div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content" style="border-radius: 18px; border: 1px solid rgba(111, 78, 55, 0.14); background: linear-gradient(155deg, #fffaf4 0%, #f8f0e4 100%);">
+				<div class="modal-header" style="border-bottom: 1px solid rgba(111, 78, 55, 0.14);">
+					<h5 class="modal-title fw-bold" id="addAdminModalLabel" style="color: #3f291f;">
+						<i class="bi bi-person-plus me-2"></i>Add New Admin
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<form method="POST" id="addAdminForm">
+					<input type="hidden" name="action" value="add_admin">
+					<div class="modal-body" style="padding: 1.5rem;">
+						<div class="mb-3">
+							<label for="adminUsername" class="form-label" style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #7b5d48;">
+								<i class="bi bi-at me-1"></i>Username
+							</label>
+							<input type="text" name="username" class="form-control" id="adminUsername" required style="border: 1px solid rgba(111, 78, 55, 0.24); border-radius: 10px; padding: 0.6rem 0.75rem;">
+						</div>
+						<div class="mb-3">
+							<label for="adminName" class="form-label" style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #7b5d48;">
+								<i class="bi bi-person me-1"></i>Full Name
+							</label>
+							<input type="text" name="name" class="form-control" id="adminName" required style="border: 1px solid rgba(111, 78, 55, 0.24); border-radius: 10px; padding: 0.6rem 0.75rem;">
+						</div>
+						<div class="mb-3">
+							<label for="adminEmail" class="form-label" style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #7b5d48;">
+								<i class="bi bi-envelope me-1"></i>Email Address
+							</label>
+							<input type="email" name="email" class="form-control" id="adminEmail" required style="border: 1px solid rgba(111, 78, 55, 0.24); border-radius: 10px; padding: 0.6rem 0.75rem;">
+						</div>
+						<div class="mb-3">
+							<label for="adminPassword" class="form-label" style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #7b5d48;">
+								<i class="bi bi-lock me-1"></i>Password
+							</label>
+							<input type="password" name="password" class="form-control" id="adminPassword" required style="border: 1px solid rgba(111, 78, 55, 0.24); border-radius: 10px; padding: 0.6rem 0.75rem;">
+						</div>
+						<div class="alert alert-info border-0" style="background: rgba(150, 75, 0, 0.1); color: #7b5d48; font-size: 0.85rem;">
+							<i class="bi bi-info-circle me-2"></i>This will create a new admin account with full access.
+						</div>
+					</div>
+					<div class="modal-footer" style="border-top: 1px solid rgba(111, 78, 55, 0.14);">
+						<button type="button" class="btn admin-btn admin-btn-ghost btn-sm" data-bs-dismiss="modal">
+							<i class="bi bi-x-circle me-1"></i>Cancel
+						</button>
+						<button type="submit" class="btn admin-btn admin-btn-primary btn-sm">
+							<i class="bi bi-check-circle me-1"></i>Create Admin
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-auto">
 		<div class="container-fluid bh-footer-bar-container">
 			<div class="bh-footer-bar-left">
 				<div class="bh-footer-bar-logo-box">

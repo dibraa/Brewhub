@@ -8,57 +8,7 @@ if (!isset($_SESSION['bh_orders']) || !is_array($_SESSION['bh_orders'])) {
   $_SESSION['bh_orders'] = [];
 }
 
-// Demo orders for display
-$demoOrders = [
-  [
-    'id' => 'ORD-2024-001',
-    'date' => '2024-04-20',
-    'items' => 3,
-    'total' => 1177.00,
-    'status' => 'Delivered',
-    'payment' => 'COD',
-    'customer_name' => 'Juan Dela Cruz',
-    'customer_phone' => '09123456789',
-    'customer_address' => '123 Main St, Manila',
-    'products' => [
-      ['name' => 'Arabica Coffee Beans', 'qty' => 2, 'price' => 450.00],
-      ['name' => 'Espresso Machine', 'qty' => 1, 'price' => 277.00],
-    ],
-  ],
-  [
-    'id' => 'ORD-2024-002',
-    'date' => '2024-04-18',
-    'items' => 2,
-    'total' => 678.00,
-    'status' => 'In Transit',
-    'payment' => 'GCash',
-    'customer_name' => 'Maria Santos',
-    'customer_phone' => '09187654321',
-    'customer_address' => '456 Oak Ave, Quezon City',
-    'products' => [
-      ['name' => 'Coffee Cups Set', 'qty' => 1, 'price' => 350.00],
-      ['name' => 'Coffee Filters', 'qty' => 1, 'price' => 328.00],
-    ],
-  ],
-  [
-    'id' => 'ORD-2024-003',
-    'date' => '2024-04-15',
-    'items' => 5,
-    'total' => 2547.00,
-    'status' => 'Processing',
-    'payment' => 'Card',
-    'customer_name' => 'Pedro Reyes',
-    'customer_phone' => '09198765432',
-    'customer_address' => '789 Pine Rd, Makati',
-    'products' => [
-      ['name' => 'Coffee Grinder', 'qty' => 1, 'price' => 899.00],
-      ['name' => 'Milk Frother', 'qty' => 2, 'price' => 450.00],
-      ['name' => 'Coffee Beans', 'qty' => 2, 'price' => 374.00],
-    ],
-  ],
-];
-
-$orders = count($_SESSION['bh_orders']) > 0 ? $_SESSION['bh_orders'] : $demoOrders;
+$orders = (array) $_SESSION['bh_orders'];
 
 $cartCount = array_sum(array_map('intval', (array) ($_SESSION['bh_cart'] ?? [])));
 ?>

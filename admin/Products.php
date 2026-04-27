@@ -3,49 +3,68 @@ declare(strict_types=1);
 
 session_start();
 
-function bh_demo_products_seed(): array
+function bh_fetch_products_from_session(): array
 {
-	return [
-		[
-			'id' => 101,
-			'name' => 'Arabica Beans (1kg)',
-			'category' => 'Coffee & Ingredients',
-			'price' => 549.00,
-			'image' => '../Assets/Arabica.png',
-		],
-		[
-			'id' => 102,
-			'name' => 'Robusta Beans (1kg)',
-			'category' => 'Coffee & Ingredients',
-			'price' => 499.00,
-			'image' => '../Assets/Robusta.png',
-		],
-		[
-			'id' => 103,
-			'name' => 'Coffee Cups Pack',
-			'category' => 'Cups & Packaging',
-			'price' => 129.00,
-			'image' => '../Assets/Cups.png',
-		],
-		[
-			'id' => 104,
-			'name' => 'Brewing Equipment Set',
-			'category' => 'Equipments',
-			'price' => 1499.00,
-			'image' => '../Assets/Equipment.png',
-		],
-		[
-			'id' => 105,
-			'name' => 'Pastry Box Bundle',
-			'category' => 'Pastry',
-			'price' => 219.00,
-			'image' => '../Assets/pastries.png',
-		],
-	];
+	$products = $_SESSION['bh_products'] ?? [];
+	if (!is_array($products)) {
+		return [];
+	}
+
+	$out = [];
+	foreach ($products as $p) {
+		if (!is_array($p)) {
+			continue;
+		}
+		$id = (int) ($p['id'] ?? 0);
+		if ($id <= 0) {
+			continue;
+		}
+		$out[] = [
+			'id' => $id,
+			'name' => (string) ($p['name'] ?? ''),
+			'category' => (string) ($p['category'] ?? ''),
+			'price' => (float) ($p['price'] ?? 0),
+			'image' => (string) ($p['image'] ?? ''),
+		];
+	}
+
+	return $out;
 }
 
-if (!isset($_SESSION['bh_admin_demo_products']) || !is_array($_SESSION['bh_admin_demo_products'])) {
-	$_SESSION['bh_admin_demo_products'] = bh_demo_products_seed();
+function bh_delete_product_from_session(int $productId): bool
+{
+	if ($productId <= 0) {
+		return false;
+	}
+
+	$products = $_SESSION['bh_products'] ?? [];
+	if (!is_array($products)) {
+		$products = [];
+	}
+
+	$deleted = false;
+	$next = [];
+	foreach ($products as $p) {
+		if (!is_array($p)) {
+			continue;
+		}
+		$id = (int) ($p['id'] ?? 0);
+		if ($id === $productId) {
+			$deleted = true;
+			continue;
+		}
+		$next[] = $p;
+	}
+	$_SESSION['bh_products'] = $next;
+
+	if (isset($_SESSION['bh_product_cache']) && is_array($_SESSION['bh_product_cache'])) {
+		unset($_SESSION['bh_product_cache'][$productId]);
+	}
+	if (isset($_SESSION['bh_cart']) && is_array($_SESSION['bh_cart'])) {
+		unset($_SESSION['bh_cart'][$productId]);
+	}
+
+	return $deleted;
 }
 
 $flash = null;
@@ -54,20 +73,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 	$action = (string) ($_POST['action'] ?? '');
 	if ($action === 'delete') {
 		$productId = (int) ($_POST['product_id'] ?? 0);
-
-		$products = (array) $_SESSION['bh_admin_demo_products'];
-		$beforeCount = count($products);
-		$products = array_values(array_filter($products, static fn($p) => (int) ($p['id'] ?? 0) !== $productId));
-		$_SESSION['bh_admin_demo_products'] = $products;
-
-		$afterCount = count($products);
-		$flash = ($afterCount < $beforeCount)
-			? 'Product deleted (demo).'
-			: 'Product not found.';
+		if ($productId <= 0) {
+			$flash = 'Invalid product id.';
+		} else {
+			$deleted = bh_delete_product_from_session($productId);
+			$flash = $deleted ? 'Product deleted.' : 'Product not found.';
+		}
 	}
 }
 
-$products = (array) $_SESSION['bh_admin_demo_products'];
+$products = bh_fetch_products_from_session();
 ?>
 
 <!DOCTYPE html>
@@ -81,7 +96,7 @@ $products = (array) $_SESSION['bh_admin_demo_products'];
 	<link href="../Style.css?v=20260420" rel="stylesheet">
 </head>
 
-<body class="admin-page admin-sidebar-layout">
+<body class="admin-page admin-sidebar-layout d-flex flex-column min-vh-100">
 	<nav class="admin-topbar">
 		<div class="admin-topbar-container">
 			<button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
@@ -137,7 +152,7 @@ $products = (array) $_SESSION['bh_admin_demo_products'];
 					<div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
 						<div>
 							<h2 class="admin-dashboard-title mb-1">Products</h2>
-							<div class="text-muted">Temporary demo data (acts like database results).</div>
+							<div class="text-muted">Manage products in the current session.</div>
 						</div>
 						<a class="btn admin-btn admin-btn-ghost btn-sm" href="admin.php"><i class="bi bi-arrow-left me-1"></i>Back</a>
 					</div>
@@ -157,7 +172,7 @@ $products = (array) $_SESSION['bh_admin_demo_products'];
 									<span class="admin-card-icon"><i class="bi bi-inbox"></i></span>
 									<div>
 										<div class="fw-bold">No products found</div>
-										<div class="text-muted">Add products to your database later — this page will show them here.</div>
+										<div class="text-muted">Add products later — this page will show them here.</div>
 									</div>
 								</div>
 							</div>
@@ -202,7 +217,7 @@ $products = (array) $_SESSION['bh_admin_demo_products'];
 		</section>
 	</main>
 
-	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-5">
+	<footer class="bh-footer-bar px-4 px-lg-5 py-4 mt-auto">
 		<div class="container-fluid bh-footer-bar-container">
 			<div class="bh-footer-bar-left">
 				<div class="bh-footer-bar-logo-box">

@@ -3,8 +3,28 @@ if (session_status() === PHP_SESSION_NONE) {
 	session_start();
 }
 
-$fullName = isset($_GET['fullname']) && $_GET['fullname'] !== '' ? $_GET['fullname'] : 'Ariana Cruz';
-$email = isset($_GET['email']) && $_GET['email'] !== '' ? $_GET['email'] : 'ariana.cruz@brewhub.com';
+$fullName = '';
+$email = '';
+
+if (!empty($_SESSION['loggedin'])) {
+	$fullName = (string) ($_SESSION['fullname'] ?? '');
+	$email = (string) ($_SESSION['email'] ?? '');
+}
+
+if ($fullName === '' && isset($_GET['fullname'])) {
+	$fullName = (string) $_GET['fullname'];
+}
+if ($email === '' && isset($_GET['email'])) {
+	$email = (string) $_GET['email'];
+}
+
+$fullName = trim($fullName);
+$email = trim($email);
+
+if ($fullName === '' || $email === '') {
+	header('Location: Login.php');
+	exit;
+}
 
 if (!isset($_SESSION['bh_cart']) || !is_array($_SESSION['bh_cart'])) {
 	$_SESSION['bh_cart'] = [];
