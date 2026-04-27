@@ -47,7 +47,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         } else if ($role == 'seller'){
                             echo json_encode(['status' => 'success', 'redirect' => 'Seller/SellerDashboard.php']);
                         } else {
-                            echo json_encode(['status' => 'success', 'redirect' => 'Buyer/Buyer_DashBoard.php']);
+                            echo json_encode(['status' => 'success', 'redirect' => 'Buyer/DashBoard.php']);
                         }
                         exit();
                 
