@@ -1728,6 +1728,23 @@ body.admin-sidebar-collapsed .admin-sidebar {
 	border-radius: 12px;
 }
 
+.profile-info-item input.form-control {
+	border: 1px solid rgba(111, 78, 55, 0.24);
+	border-radius: 8px;
+	padding: 0.5rem 0.75rem;
+	font-size: 0.95rem;
+	color: #3f291f;
+	background-color: #fff;
+	box-shadow: none;
+	width: 100%;
+}
+
+.profile-info-item input.form-control:focus {
+	border-color: #8a6a53;
+	box-shadow: 0 0 0 0.12rem rgba(150, 75, 0, 0.15);
+	background-color: #fff;
+}
+
 .profile-info-label {
 	font-size: 0.82rem;
 	text-transform: uppercase;

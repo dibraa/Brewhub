@@ -369,22 +369,6 @@ if ($db) {
 						</div>
 					</div>
 
-					<div class="col-12" id="products">
-						<div class="admin-section-card h-100">
-							<div class="admin-card-header">
-								<div class="d-flex align-items-center gap-2">
-									<span class="admin-card-icon"><i class="bi bi-box-seam"></i></span>
-									<h3 class="admin-card-title mb-0">Products</h3>
-								</div>
-								<a class="admin-card-link" href="Products.php">Manage</a>
-							</div>
-							<div class="d-flex flex-wrap gap-2">
-								<a class="btn admin-btn admin-btn-primary btn-sm" href="Products.php"><i class="bi bi-grid-3x3-gap me-1"></i>Open Products</a>
-								<a class="btn admin-btn admin-btn-ghost btn-sm" href="../Buyer/Dashboard.php"><i class="bi bi-box-arrow-up-right me-1"></i>View storefront</a>
-							</div>
-						</div>
-					</div>
-
 				</div>
 			</div>
 		</section>
