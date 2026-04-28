@@ -32,7 +32,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
        
         $stmt->close();
 
-        $stmt = $conn->prepare("INSERT INTO users (name, email, password, username, role) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO users (fullName, email, password, userName, role) VALUES (?, ?, ?, ?, ?)");
         $role = 'buyer';
         $stmt->bind_param("sssss", $name, $email, $hashed_password, $username, $role);
 

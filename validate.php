@@ -14,7 +14,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     
     if(isset($_POST['email']) && isset($_POST['password']) && !empty($_POST['email']) && !empty($_POST['password'])){
 
-    $sql = "SELECT ID, email, name, password, username, role FROM users where email = ?";
+    $sql = "SELECT user_id, email, fullName, password, userName, role FROM users where email = ?";
 
     if($stmt = $conn->prepare($sql)){
         $stmt->bind_param("s", $param_email);
@@ -36,8 +36,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         $_SESSION['loggedin'] = true;
                         $_SESSION['ID'] = $ID;
                         $_SESSION['email'] = $email;
-                        $_SESSION['fullname'] = $name;
-                        $_SESSION['username'] = $username;
+                        $_SESSION['fullName'] = $name;
+                        $_SESSION['userName'] = $username;
                         $_SESSION['role'] = $role;
 
                         if(empty($role)) $role = 'buyer';
