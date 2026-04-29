@@ -16,15 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $email = $_SESSION['email'];
-    $stmt = $pdo->prepare("SELECT reset_code FROM users1 WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $email = $_SESSION['email'];  // <-- add this line
+    
+   $stmt = $conn->prepare("SELECT reset_code FROM users WHERE email = ?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
 
     if ($user && $enteredCode == $user['reset_code']) {
-        $_SESSION['reset_email'] = $email;
-        $_SESSION['reset_code_verified'] = true;
-        unset($_SESSION['email']); // Clean up
 
         header('Location: reset-password.php');
         exit();
@@ -66,12 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p>Please enter the code from your email below.</p>
                     </header>
 
-                    <?php if ($error): ?>
-                        <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-                    <?php endif; ?>
-                    <?php if ($success): ?>
-                        <div class="alert alert-success" role="alert"><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></div>
-                    <?php endif; ?>
+ <?php if(isset($_SESSION['error'])): ?>
+            			<div style="color: #dc3545; background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+                		<?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            			</div>
+        				<?php endif; ?>
 
                     <form action="" method="post" autocomplete="off">
                         <label for="verification_code" class="form-label">Verification Code</label>

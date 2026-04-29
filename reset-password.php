@@ -2,11 +2,6 @@
 session_start();
 require 'config.php';
 
-if (empty($_SESSION['verified_email'])) {
-    header('Location: ForgotPassword.php');
-    exit();
-}
-
 $email = $_SESSION['verified_email'];
 $error = '';
 $success = '';
