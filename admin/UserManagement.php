@@ -30,7 +30,7 @@ function bh_fetch_users_from_db(): array
 	}
 
 	try {
-		$stmt = $pdo->query("SELECT id, username, name, email, role, 'Active' as status, NOW() as created_at FROM users ORDER BY id DESC");
+		$stmt = $pdo->query("SELECT user_id AS id, userName AS username, fullName AS name, email, role, 'Active' as status, created_at FROM users ORDER BY user_id DESC");
 		return $stmt->fetchAll();
 	} catch (PDOException $e) {
 		return [];
@@ -45,7 +45,7 @@ function bh_delete_user_from_db(int $userId): bool
 	}
 
 	try {
-		$stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+		$stmt = $pdo->prepare("DELETE FROM users WHERE user_id = ?");
 		return $stmt->execute([$userId]);
 	} catch (PDOException $e) {
 		return false;
@@ -61,7 +61,7 @@ function bh_add_admin_to_db(string $username, string $name, string $email, strin
 
 	try {
 		$hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-		$stmt = $pdo->prepare("INSERT INTO users (username, name, email, password, role) VALUES (?, ?, ?, ?, 'admin')");
+		$stmt = $pdo->prepare("INSERT INTO users (userName, fullName, email, password, role) VALUES (?, ?, ?, ?, 'admin')");
 		return $stmt->execute([$username, $name, $email, $hashedPassword]);
 	} catch (PDOException $e) {
 		return false;

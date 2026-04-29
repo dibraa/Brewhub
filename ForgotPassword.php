@@ -1,3 +1,70 @@
+<?php
+session_start();
+require 'config.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+require 'vendor/autoload.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email']);
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['error'] = "Please enter a valid email address.";
+        header('Location: ForgotPassword.php');
+        exit();
+    }
+
+    $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    if ($user) {
+        $reset_code = sprintf('%06d', rand(100000, 999999));
+        $update = $conn->prepare("UPDATE users SET reset_code = ? WHERE email = ?");
+        $update->bind_param('ss', $reset_code, $email);
+        $update->execute();
+
+        $_SESSION['email'] = $email;
+
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = SMTP_HOST;
+            $mail->SMTPAuth = true;
+            $mail->Username = SMTP_USERNAME;
+            $mail->Password = SMTP_PASSWORD;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = SMTP_PORT;
+
+            $mail->setFrom(FROM_EMAIL, FROM_NAME);
+            $mail->addAddress($email);
+
+            $mail->isHTML(true);
+            $mail->Subject = "Password Reset Code - BrewHub";
+            $mail->Body = "<p>Your reset code: <strong>{$reset_code}</strong></p>";
+            $mail->AltBody = "Your reset code: {$reset_code}";
+
+            $mail->send();
+
+            header('Location: verify-code.php');
+            exit();
+
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Failed to send email.";
+            header('Location: ForgotPassword.php');
+            exit();
+        }
+    } else {
+        $_SESSION['error'] = "Email not found.";
+        header('Location: ForgotPassword.php');
+        exit();
+    }
+}
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -28,23 +95,15 @@
 
 					<form action="#" method="post" autocomplete="off">
 						<label for="email" class="form-label">Email</label>
-						<div class="input-group mb-2">
-							<input id="email" name="email" type="email" class="form-control" required>
-							<button class="btn btn-login" type="submit" name="action" value="send_code">Send</button>
-						</div>
-
-						<div class="mb-2">
-							<label for="code" class="form-label">Code</label>
-							<input id="code" name="code" type="text" class="form-control" required>
-						</div>
-
-						<div class="mb-3">
-							<label for="new_password" class="form-label">New Password</label>
-							<input id="new_password" name="new_password" type="password" class="form-control border-0 border-bottom rounded-0" required>
-						</div>
-
-						<button type="submit" class="btn btn-login w-100">Reset Password</button>
-					</form>
+						 <?php if(isset($_SESSION['error'])): ?>
+            			<div style="color: #dc3545; background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+                		<?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            			</div>
+        				<?php endif; ?>
+							<div class="mb-2">
+								<input id="email" name="email" type="email" class="form-control" required>
+							</div>
+							<button class="btn btn-login w-100" type="submit" name="action" value="send_code">Send</button>
 
 					<p class="signup-note">Back to <a href="Login.php">Log In</a></p>
 				</div>
